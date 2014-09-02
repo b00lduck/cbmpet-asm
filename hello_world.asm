@@ -5,21 +5,42 @@
 .pc = BASIC "Basic Upstart"
 :BasicUpstart(MAIN)
 
+.var framecount = 0
+
 .pc = MAIN "Main" {
 	start:
-		:ClearScreen()
 		
+		:ClearScreen()	
 		:SwitchLowercase()
 		
-		:DrawText(5, 6, hello1, $1d)
-		:DrawText(5, 8, hello2, $1d)
-		:DrawText(5, 10, hello3, $1d)
-		:DrawText(5, 12, hello4, $1d)
+		:DrawText(7, 6, hello1, $1d)
+		:DrawText(7, 8, hello2, $1d)
+		:DrawText(7, 10, hello3, $1d)
+		:DrawText(7, 12, hello4, $1d)	
+			
+		sei
+		lda #<isr
+		sta $90
+		lda #>isr
+		sta $91
+		cli
 		
 	endloop:
 		jmp endloop
-			
+
+	isr:
+		inc $8000
+		inc framecount
+		
+		.var myString= "frame " + framecount		
+
+		:DrawText(0, 2, myString, $0d)			
+							
+		jmp $e455		
+		
 }
+
+
 
 hello1: .text " b00lduck  proudly  presents "
 hello2: .text "vintage  6502  assembly  code"
