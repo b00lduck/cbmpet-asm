@@ -1,11 +1,11 @@
 .const BASIC=$0401
 .const MAIN=$040d
 .const VRAM=$8000
+.const ORIG_ISR=$e455
 
-.pc = BASIC "Basic Upstart"
-:BasicUpstart(MAIN)
-
-.var framecount = 0
+.pc = BASIC "Basic Upstart" {
+	:BasicUpstart(MAIN)
+}
 
 .pc = MAIN "Main" {
 	start:
@@ -13,39 +13,101 @@
 		:ClearScreen()	
 		:SwitchLowercase()
 		
-		:DrawText(7, 6, hello1, $1d)
-		:DrawText(7, 8, hello2, $1d)
-		:DrawText(7, 10, hello3, $1d)
-		:DrawText(7, 12, hello4, $1d)	
+		:DrawText(6, 8, hello1, $1d)
+		:DrawText(6, 10, hello2, $1d)
+		:DrawText(6, 12, hello3, $1d)
+		:DrawText(6, 14, hello4, $1d)	
 			
+		// set interrupt vector to 'isr'
 		sei
-		lda #<isr
+		lda #<isr	// high byte
 		sta $90
-		lda #>isr
+		lda #>isr	// low byte
 		sta $91
 		cli
 		
-	endloop:
-		jmp endloop
+	mainloop:
+	
+		:DrawBox(0,0,40,25,framecount)
+	
+		jmp mainloop
 
-	isr:
-		inc $8000
-		inc framecount
-		
-		//.var myString= "frame " + framecount		
-		//:DrawText(0, 2, myString, $0d)			
-							
-		jmp $e455		
+	isr:		
+		inc framecount	
+		jmp ORIG_ISR	// jump to original interrupt	
 		
 }
 
-
+framecount: .dword 0
 
 hello1: .text " b00lduck  proudly  presents "
 hello2: .text "vintage  6502  assembly  code"
 hello3: .text "  by graf hardt and shazman  "
 hello4: .text "      on  an  cbm 4032       "
 
+.macro DrawBox(sx,sy,width,height,char) {	
+	
+	.var addr1 = VRAM
+	.var addr2 = VRAM + 24 * 40
+	
+	lda char
+	
+	ldx #40
+	hloop:		
+		dex
+		sta addr1, x				
+		sta addr2, x		
+		bne hloop
+	
+	:loadToZP($30, $8028)
+		
+	ldx #23
+	ldy #0	
+	lda char
+		
+	vloop:				
+		
+		sta ($30),y		
+		:addToZP8($30, $27)
+		
+		sta ($30),y		
+		:addToZP8($30, $01)
+		
+		dex
+		bne vloop
+		
+}
+
+// In-Place add of an 8-Bit value to an address pointer in the ZeroPage
+.macro addToZP8(addr, val) {
+	pha           // push acc to stack	
+	
+    clc           // Ensure carry is clear
+    lda addr      // Add the least significant address byte
+    adc #val	  // Add $28 with carry	
+    sta addr      // store the result
+		
+    lda addr + 1  // Add the most significant byte
+    adc #$00      // add propagated carry bit
+    sta addr + 1  // store the result
+	
+	pla			  // pull acc from stack
+} 
+
+// Load address into ZeroPage at offset	
+.macro loadToZP(addr, value) {
+	pha			// push acc to stack	
+	
+	// high byte
+	lda #<value   	
+	sta addr	
+	
+	// low byte	
+	lda #>value	
+	sta addr + 1
+		
+	pla			// pull acc from stack
+}
 
 // switch to upeprcase/lowercase mode
 .macro SwitchLowercase() {		
@@ -59,10 +121,9 @@ hello4: .text "      on  an  cbm 4032       "
 		sta $e84c
 }
 
+// draw text without clipping
 .macro DrawText(tx, ty, text, len) {
-
 		.var addr = VRAM + tx + ty * 40
-
 		ldx #$00
 	loop:
 		lda text, x
@@ -70,13 +131,14 @@ hello4: .text "      on  an  cbm 4032       "
 		inx
 		cpx #len
 		bne loop
-
 }
 
+// clear the screen
 .macro ClearScreen() {
 	:FillScreen($20)
 }
 
+// fill the screen with character 'clearByte'
 .macro FillScreen(clearByte) {
 		lda #clearByte
 		ldx #$00
