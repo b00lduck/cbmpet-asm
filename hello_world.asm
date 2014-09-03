@@ -14,9 +14,9 @@
 		:SwitchLowercase()
 		
 		:DrawText(6, 8, hello1, $1d)
-		:DrawText(6, 10, hello2, $1d)
-		:DrawText(6, 12, hello3, $1d)
-		:DrawText(6, 14, hello4, $1d)	
+		:DrawText(6, 12, hello2, $1d)
+		:DrawText(6, 14, hello3, $1d)
+		:DrawText(6, 16, hello4, $1d)	
 			
 		// set interrupt vector to 'isr'
 		sei
@@ -28,7 +28,7 @@
 		
 	mainloop:
 	
-		:DrawBox(0,0,40,25,framecount)
+		:DrawOuterBox(framecount)
 	
 		jmp mainloop
 
@@ -45,32 +45,32 @@ hello2: .text "vintage  6502  assembly  code"
 hello3: .text "  by graf hardt and shazman  "
 hello4: .text "      on  an  cbm 4032       "
 
-.macro DrawBox(sx,sy,width,height,char) {	
+.macro DrawOuterBox(char) {	
 	
-	.var addr1 = VRAM
-	.var addr2 = VRAM + 24 * 40
-	
-	lda char
-	
-	ldx #40
-	hloop:		
-		dex
-		sta addr1, x				
-		sta addr2, x		
+	// Draw horizontal lines
+	:loadToZP($30, $8000)
+	:loadToZP($32, $83C0)
+		
+	lda char	
+	ldy #$28
+	hloop:				
+		dey
+		sta ($30),y	
+		sta ($32),y			
 		bne hloop
 	
-	:loadToZP($30, $8028)
-		
+	// Draw vertical lines
+	:loadToZP($30, $8028)	
+	
+	// Vertical lines			
 	ldx #23
-	ldy #0	
-	lda char
-		
+	ldy #0			
 	vloop:				
 		
 		sta ($30),y		
 		:addToZP8($30, $27)
 		
-		sta ($30),y		
+		sta ($30),y
 		:addToZP8($30, $01)
 		
 		dex
