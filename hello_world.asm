@@ -32,9 +32,8 @@
 		inc $8000
 		inc framecount
 		
-		.var myString= "frame " + framecount		
-
-		:DrawText(0, 2, myString, $0d)			
+		//.var myString= "frame " + framecount		
+		//:DrawText(0, 2, myString, $0d)			
 							
 		jmp $e455		
 		
