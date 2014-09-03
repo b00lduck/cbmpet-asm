@@ -3,6 +3,10 @@
 .const VRAM=$8000
 .const ORIG_ISR=$e455
 
+.const ZP1=$e0
+.const ZP2=$e2
+.const ZP_ISR=$90
+
 .pc = BASIC "Basic Upstart" {
 	:BasicUpstart(MAIN)
 }
@@ -20,17 +24,26 @@
 			
 		// set interrupt vector to 'isr'
 		sei
-		lda #<isr	// high byte
-		sta $90
-		lda #>isr	// low byte
-		sta $91
+		:loadToZP(ZP_ISR, isr)
 		cli
 		
 	mainloop:
 	
 		:DrawOuterBox(framecount)
+		
+		// check for keystroke
+		lda $97
+		cmp #$ff
+		beq mainloop
 	
-		jmp mainloop
+		
+	ende:
+		lda #$00
+		sta $9e
+		:loadToZP(ZP_ISR, ORIG_ISR)
+		:ClearScreen()	
+		:SwitchGraphics()						
+		rts
 
 	isr:		
 		inc framecount	
@@ -45,33 +58,37 @@ hello2: .text "vintage  6502  assembly  code"
 hello3: .text "  by graf hardt and shazman  "
 hello4: .text "      on  an  cbm 4032       "
 
+
+// Draw outer box
+// uses ACC, X, Y
+// ZP $30, $32
 .macro DrawOuterBox(char) {	
 	
 	// Draw horizontal lines
-	:loadToZP($30, $8000)
-	:loadToZP($32, $83C0)
+	:loadToZP(ZP1, $8000)
+	:loadToZP(ZP2, $83C0)
 		
 	lda char	
 	ldy #$28
 	hloop:				
 		dey
-		sta ($30),y	
-		sta ($32),y			
+		sta (ZP1),y	
+		sta (ZP2),y			
 		bne hloop
 	
 	// Draw vertical lines
-	:loadToZP($30, $8028)	
+	:loadToZP(ZP1, $8028)	
 	
 	// Vertical lines			
 	ldx #23
 	ldy #0			
 	vloop:				
 		
-		sta ($30),y		
-		:addToZP8($30, $27)
+		sta (ZP1),y		
+		:addToZP8(ZP1, $27)
 		
-		sta ($30),y
-		:addToZP8($30, $01)
+		sta (ZP1),y
+		:addToZP8(ZP1, $01)
 		
 		dex
 		bne vloop
@@ -79,6 +96,7 @@ hello4: .text "      on  an  cbm 4032       "
 }
 
 // In-Place add of an 8-Bit value to an address pointer in the ZeroPage
+// no regs changed
 .macro addToZP8(addr, val) {
 	pha           // push acc to stack	
 	
@@ -95,35 +113,49 @@ hello4: .text "      on  an  cbm 4032       "
 } 
 
 // Load address into ZeroPage at offset	
+// no regs changed
 .macro loadToZP(addr, value) {
 	pha			// push acc to stack	
+	tya
+	pha
 	
 	// high byte
 	lda #<value   	
 	sta addr	
-	
-	// low byte	
-	lda #>value	
-	sta addr + 1
 		
+	// low byte	
+	ldy #$01	
+	lda #>value	
+	sta addr, y
+		
+	pla
+	tay
 	pla			// pull acc from stack
 }
 
 // switch to upeprcase/lowercase mode
 .macro SwitchLowercase() {		
-		lda #$0e
-		sta $e84c
+	pha
+	lda #$0e
+	sta $e84c
+	pla
 }
 
 // switch to uppercase/graphics mode
 .macro SwitchGraphics() {		
-		lda #$0c
-		sta $e84c
+	pha
+	lda #$0c
+	sta $e84c
+	pla
 }
 
 // draw text without clipping
 .macro DrawText(tx, ty, text, len) {
-		.var addr = VRAM + tx + ty * 40
+
+		pha
+				
+		.var addr = VRAM + tx + ty * 40		
+		
 		ldx #$00
 	loop:
 		lda text, x
@@ -131,6 +163,8 @@ hello4: .text "      on  an  cbm 4032       "
 		inx
 		cpx #len
 		bne loop
+		
+		pla
 }
 
 // clear the screen
