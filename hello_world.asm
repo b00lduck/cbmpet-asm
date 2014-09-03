@@ -12,8 +12,7 @@
 }
 
 .pc = MAIN "Main" {
-	start:
-		
+	start:		
 		:ClearScreen()	
 		:SwitchLowercase()
 		
@@ -21,11 +20,11 @@
 		:DrawText(6, 12, hello2, $1d)
 		:DrawText(6, 14, hello3, $1d)
 		:DrawText(6, 16, hello4, $1d)	
-			
+				
 		// set interrupt vector to 'isr'
 		sei
-		:loadToZP(ZP_ISR, isr)
-		cli
+		:loadToZP(ZP_ISR, isr)		
+		cli			
 		
 	mainloop:
 	
@@ -38,6 +37,7 @@
 	
 		
 	ende:
+		// clear keyboard buffer
 		lda #$00
 		sta $9e
 		:loadToZP(ZP_ISR, ORIG_ISR)
