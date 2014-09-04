@@ -16,10 +16,12 @@
 		:ClearScreen()	
 		:SwitchLowercase()
 		
-		:DrawText(6, 8, hello1, $1d)
-		:DrawText(6, 12, hello2, $1d)
-		:DrawText(6, 14, hello3, $1d)
-		:DrawText(6, 16, hello4, $1d)	
+		:DrawTextZt(6, 8, hello1)
+		:DrawTextZt(6, 12, hello2)
+		:DrawTextZt(6, 14, hello3)
+		:DrawTextZt(6, 16, hello4)
+
+		:DrawTextZt(3, 22, text1)			
 				
 		// set interrupt vector to 'isr'
 		sei
@@ -53,10 +55,13 @@
 
 framecount: .dword 0
 
-hello1: .text " b00lduck  proudly  presents "
-hello2: .text "vintage  6502  assembly  code"
-hello3: .text "  by graf hardt and shazman  "
-hello4: .text "      on  an  cbm 4032       "
+hello1: .text " b00lduck  proudly  presents" .byte 0
+hello2: .text "vintage  6502  assembly  code" .byte 0
+hello3: .text "  by Graf Hardt and Shazman" .byte 0
+hello4: .text "      on  an  cbm 4032" .byte 0
+
+text1:  .text "Framecount:" .byte 0
+        
 
 
 // Draw outer box
@@ -164,6 +169,23 @@ hello4: .text "      on  an  cbm 4032       "
 		cpx #len
 		bne loop
 		
+		pla
+}
+
+// draw zero terminated text
+.macro DrawTextZt(tx, ty, text) {
+		pha				
+		.var addr = VRAM + tx + ty * 40				
+		ldx #$00
+	loop:
+		lda text, x		
+		cmp #$00
+		beq end
+		sta addr, x
+		inx		
+		jmp loop	
+
+	end:		
 		pla
 }
 
