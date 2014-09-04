@@ -1,18 +1,20 @@
-.const BASIC=$0401
-.const MAIN=$040d
-.const VRAM=$8000
-.const ORIG_ISR=$e455
-
-.const ZP1=$e0
-.const ZP2=$e2
-.const ZP_ISR=$90
+/**
+ * CBM 4016 assembler demo by graf hardt of b00lduck
+ * written in September 2014
+ */
+.import source "config.asm"
+.import source "macros.asm"
 
 .pc = BASIC "Basic Upstart" {
 	:BasicUpstart(MAIN)
 }
 
 .pc = MAIN "Main" {
-	start:		
+	
+	start:			
+	
+		cld
+	
 		:ClearScreen()	
 		:SwitchLowercase()
 		
@@ -20,189 +22,101 @@
 		:DrawTextZt(6, 12, hello2)
 		:DrawTextZt(6, 14, hello3)
 		:DrawTextZt(6, 16, hello4)
-
-		:DrawTextZt(3, 22, text1)			
+						
+		:InstallIsr(isr)		
 				
-		// set interrupt vector to 'isr'
-		sei
-		:loadToZP(ZP_ISR, isr)		
-		cli			
+	mainloop:	
+		:DrawOuterBox(framecount)		
 		
-	mainloop:
-	
-		:DrawOuterBox(framecount)
+		:ItoA(text1 + 14, minutes)
 		
-		// check for keystroke
+		:ItoA(text1 + 17, seconds)
+		
+		:ItoA(text1 + 20, frames)
+		
+		:DrawTextZt(3, 22, text1)		
+		
 		lda $97
-		cmp #$ff
-		beq mainloop
+		cmp #$ff		// check for keystroke
+		
+		bne end
+		
+		jmp mainloop
 	
 		
-	ende:
-		// clear keyboard buffer
+	end:		
 		lda #$00
-		sta $9e
-		:loadToZP(ZP_ISR, ORIG_ISR)
-		:ClearScreen()	
-		:SwitchGraphics()						
+		sta $9e	// set keyboard buffer len to $00		
+	    :RestoreIsr()
+		:ClearHome()			
+		:SwitchGraphics()				
 		rts
 
 	isr:		
-		inc framecount	
-		jmp ORIG_ISR	// jump to original interrupt	
+	
+	    // slowdown the whole demo
+		dec delay
+		lda delay
+		bne wigga
+		lda #SLOWDOWN
+		sta delay
+	
+		
+		// advance frames
+		sed // decimal mode on				
+		clc
+		lda frames
+		adc #01
+		sta frames
+		cld // decimal mode off		
+		cmp #$50
+		bne wigga
+		
+		// advance seconds				
+		lda #$00
+		sta frames // reset frames	
+		sed // decimal mode on				
+		clc
+		lda seconds
+		adc #01
+		sta seconds
+		cld // decimal mode off	
+		
+		cmp #$60
+		bne wigga
+		
+		// advance minutes		
+		lda #$00
+		sta seconds // reset seconds
+		sed // decimal mode on				
+		clc
+		lda minutes
+		adc #01
+		sta minutes
+		cld // decimal mode off			
+				
+	wigga:
+		inc framecount			
+		jmp (orig_isr)		// jump to original interrupt	
 		
 }
 
+delay: .byte SLOWDOWN
+
 framecount: .dword 0
+
+frames:  .byte $00
+seconds: .byte $00
+minutes: .byte $00
+
 
 hello1: .text " b00lduck  proudly  presents" .byte 0
 hello2: .text "vintage  6502  assembly  code" .byte 0
 hello3: .text "  by Graf Hardt and Shazman" .byte 0
-hello4: .text "      on  an  cbm 4032" .byte 0
+hello4: .text "     runs on a CBM 4032" .byte 0
 
-text1:  .text "Framecount:" .byte 0
+text1:  .text "Elapsed time: 00:00.00    " .byte 0
         
+orig_isr: .word 0,0
 
 
-// Draw outer box
-// uses ACC, X, Y
-// ZP $30, $32
-.macro DrawOuterBox(char) {	
-	
-	// Draw horizontal lines
-	:loadToZP(ZP1, $8000)
-	:loadToZP(ZP2, $83C0)
-		
-	lda char	
-	ldy #$28
-	hloop:				
-		dey
-		sta (ZP1),y	
-		sta (ZP2),y			
-		bne hloop
-	
-	// Draw vertical lines
-	:loadToZP(ZP1, $8028)	
-	
-	// Vertical lines			
-	ldx #23
-	ldy #0			
-	vloop:				
-		
-		sta (ZP1),y		
-		:addToZP8(ZP1, $27)
-		
-		sta (ZP1),y
-		:addToZP8(ZP1, $01)
-		
-		dex
-		bne vloop
-		
-}
-
-// In-Place add of an 8-Bit value to an address pointer in the ZeroPage
-// no regs changed
-.macro addToZP8(addr, val) {
-	pha           // push acc to stack	
-	
-    clc           // Ensure carry is clear
-    lda addr      // Add the least significant address byte
-    adc #val	  // Add $28 with carry	
-    sta addr      // store the result
-		
-    lda addr + 1  // Add the most significant byte
-    adc #$00      // add propagated carry bit
-    sta addr + 1  // store the result
-	
-	pla			  // pull acc from stack
-} 
-
-// Load address into ZeroPage at offset	
-// no regs changed
-.macro loadToZP(addr, value) {
-	pha			// push acc to stack	
-	tya
-	pha
-	
-	// high byte
-	lda #<value   	
-	sta addr	
-		
-	// low byte	
-	ldy #$01	
-	lda #>value	
-	sta addr, y
-		
-	pla
-	tay
-	pla			// pull acc from stack
-}
-
-// switch to upeprcase/lowercase mode
-.macro SwitchLowercase() {		
-	pha
-	lda #$0e
-	sta $e84c
-	pla
-}
-
-// switch to uppercase/graphics mode
-.macro SwitchGraphics() {		
-	pha
-	lda #$0c
-	sta $e84c
-	pla
-}
-
-// draw text without clipping
-.macro DrawText(tx, ty, text, len) {
-
-		pha
-				
-		.var addr = VRAM + tx + ty * 40		
-		
-		ldx #$00
-	loop:
-		lda text, x
-		sta addr, x
-		inx
-		cpx #len
-		bne loop
-		
-		pla
-}
-
-// draw zero terminated text
-.macro DrawTextZt(tx, ty, text) {
-		pha				
-		.var addr = VRAM + tx + ty * 40				
-		ldx #$00
-	loop:
-		lda text, x		
-		cmp #$00
-		beq end
-		sta addr, x
-		inx		
-		jmp loop	
-
-	end:		
-		pla
-}
-
-// clear the screen
-.macro ClearScreen() {
-	:FillScreen($20)
-}
-
-// fill the screen with character 'clearByte'
-.macro FillScreen(clearByte) {
-		lda #clearByte
-		ldx #$00
-	loop:
-		.for(var i = 0; i < 3; i++) {
-			sta VRAM + [i * $0100], x
-		}
-		sta VRAM + [$02e8], x
-		inx
-		bne loop
-}
