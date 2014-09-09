@@ -269,6 +269,45 @@
 
 .macro ClearVVRAM() {
 
+		// Load VVRAM address to ZP1
+		lda #$00
+		sta ZP1
+		lda #$40
+		sta ZP1+1
+				
+		ldx #0 // counter
+		ldy #0
+		
+	loop:
+		
+		// set the pixel value 0
+		lda #0
+		sta (ZP1),y
+						
+		// inc ZP1 by 1, lower byte		
+		clc
+		lda ZP1		
+		adc #1
+		sta ZP1
+		bcc endcheck
+		
+		// inc ZP1+1 because carry was set and clear carry
+		inc ZP1+1
+		clc
+
+	endcheck:
+		// check if end is reached ($7e80)
+		lda ZP1+1
+		cmp #$7e 
+		bne loop
+		lda ZP1
+		cmp #$80
+		bne loop
+
+}
+
+.macro Checkerboard() {
+
 		// clear carry
 		clc
 		
@@ -280,17 +319,38 @@
 		
 		ldy #0 // always zero
 		
-		ldx #0 // row
+		ldx #0 // counter
+		
+		lda #0
+		sta ZP4 // column
+		sta ZP4+1 // flipped each column
 		
 	loop:
 		
 		// set the pixel value (1 or 0)
-		lda ZP1
+		lda ZP1		
+		adc ZP4+1
 		and #1
 		
 		sta (ZP1),y
+				
+		// inc ZP4
+		inc ZP4		
+		lda ZP4
+		cmp #80		
+		bne next
 		
+		// reset ZP4 and flip ZP4+1
+		lda #0
+		sta ZP4
+		
+		lda ZP4+1
+		eor #1
+		sta ZP4+1
+		
+	next:
 		// inc ZP1 by 1, lower byte		
+		clc
 		lda ZP1		
 		adc #1
 		sta ZP1

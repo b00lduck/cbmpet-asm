@@ -2,6 +2,8 @@
  * PET 3008 assembler demo by graf_hardt of b00lduck
  * compatible with BASIC V2
  * written in September 2014
+ *
+ * b00luck on 6502 - check!
  */
 .import source "config.asm"
 .import source "macros.asm"
@@ -17,7 +19,8 @@
 		cld
 	
 		:ClearScreen()	
-		:ClearVVRAM()
+		//ClearVVRAM()
+		:Checkerboard()
 		:SwitchLowercase()
 		
 		:DrawTextZt(4, 0, hello1)
@@ -28,14 +31,14 @@
 		:InstallIsr(isr)		
 				
 	mainloop:	
-		
+
 		:DrawMemory()
 		//:DrawOuterBox(framecount)		
 		
 		:ItoA(text1 + 14, minutes)		
 		:ItoA(text1 + 17, seconds)		
 		:ItoA(text1 + 20, frames)		
-		:DrawTextZt(0, 24, text1)		
+		:DrawTextZt(1, 23, text1)		
 		
 		lda $97
 		cmp #$ff		// check for keystroke
