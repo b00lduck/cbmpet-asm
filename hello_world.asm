@@ -26,14 +26,15 @@
 		:InstallIsr(isr)		
 				
 	mainloop:	
-		:DrawOuterBox(framecount)		
 		
-		:ItoA(text1 + 14, minutes)
+		:DrawMemory()
+		//:DrawOuterBox(framecount)		
 		
-		:ItoA(text1 + 17, seconds)
 		
-		:ItoA(text1 + 20, frames)
 		
+		:ItoA(text1 + 14, minutes)		
+		:ItoA(text1 + 17, seconds)		
+		:ItoA(text1 + 20, frames)		
 		:DrawTextZt(3, 22, text1)		
 		
 		lda $97
@@ -100,6 +101,9 @@
 		jmp (orig_isr)		// jump to original interrupt	
 		
 }
+
+
+
 
 delay: .byte SLOWDOWN
 
