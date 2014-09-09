@@ -1,27 +1,29 @@
 /**
- * CBM 4016 assembler demo by graf hardt of b00lduck
+ * PET 3008 assembler demo by graf_hardt of b00lduck
+ * compatible with BASIC V2
  * written in September 2014
  */
 .import source "config.asm"
 .import source "macros.asm"
 
-.pc = BASIC "Basic Upstart" {
+.pc = BASIC "Basic upstart" {
 	:BasicUpstart(MAIN)
 }
 
-.pc = MAIN "Main" {
+.pc = MAIN "Main code" {
 	
 	start:			
 	
 		cld
 	
 		:ClearScreen()	
+		:ClearVVRAM()
 		:SwitchLowercase()
 		
-		:DrawTextZt(6, 8, hello1)
-		:DrawTextZt(6, 12, hello2)
-		:DrawTextZt(6, 14, hello3)
-		:DrawTextZt(6, 16, hello4)
+		:DrawTextZt(4, 0, hello1)
+		:DrawTextZt(2, 2, hello2)
+		:DrawTextZt(6, 20, hello3)
+		//:DrawTextZt(6, 22, hello4)
 						
 		:InstallIsr(isr)		
 				
@@ -30,12 +32,10 @@
 		:DrawMemory()
 		//:DrawOuterBox(framecount)		
 		
-		
-		
 		:ItoA(text1 + 14, minutes)		
 		:ItoA(text1 + 17, seconds)		
 		:ItoA(text1 + 20, frames)		
-		:DrawTextZt(3, 22, text1)		
+		:DrawTextZt(0, 24, text1)		
 		
 		lda $97
 		cmp #$ff		// check for keystroke
@@ -53,15 +53,11 @@
 		:SwitchGraphics()				
 		rts
 
-	isr:		
-	
-	    // slowdown the whole demo
-		dec delay
-		lda delay
-		bne wigga
-		lda #SLOWDOWN
-		sta delay
-	
+		
+	/**
+     *	Interrupt service routine	
+	 */
+	isr:			
 		
 		// advance frames
 		sed // decimal mode on				
@@ -100,27 +96,22 @@
 		inc framecount			
 		jmp (orig_isr)		// jump to original interrupt	
 		
-}
+	.import source "data.asm"
+
+}	
+
+framecount: 	.dword 	0
+
+frames:  		.byte 	0
+seconds: 		.byte 	0
+minutes: 		.byte 	0
+       
+orig_isr: 		.dword 	0
+
+.pc = VVRAM "Virtual Video RAM" virtual
+vvram: .fill VVRAM_SIZE,0
 
 
 
-
-delay: .byte SLOWDOWN
-
-framecount: .dword 0
-
-frames:  .byte $00
-seconds: .byte $00
-minutes: .byte $00
-
-
-hello1: .text " b00lduck  proudly  presents" .byte 0
-hello2: .text "vintage  6502  assembly  code" .byte 0
-hello3: .text "  by Graf Hardt and Shazman" .byte 0
-hello4: .text "     runs on a CBM 4032" .byte 0
-
-text1:  .text "Elapsed time: 00:00.00    " .byte 0
-        
-orig_isr: .word 0,0
 
 

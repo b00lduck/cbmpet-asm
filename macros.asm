@@ -109,148 +109,207 @@
 		pla
 }
 
-
-.macro DrawVVramLine(vram, vvram) {
-
-	// Pointer to the even line VVRAM
-	:loadToZP(ZP1, vvram)
+/**
+ * ZP1: VVRAM even line address
+ * ZP2: VVRAM odd line address
+ * ZP3: VRAM line address
+ */
+.macro DrawVVramLine() {
 	
-	// Pointer to the odd line VVRAM
-	:loadToZP(ZP2, vvram + $50)
-	
-	// index of the graphics table value (0-15)
-	:loadToZP(ZP3, $00)
+		// index of the graphics table value (0-15)
+		lda #0
+		sta ZP4
 
-	// main counter
-	ldx #$00	
-	
-loop:	
-
-	ldy #$00
+		// offset counter
+		lda #0
+		sta ZP4+1
 		
-	// store first bit in ZP3 and shift left
-	lda (ZP1),y
-	asl
-	sta ZP3
-	
-	:IncZp(ZP1)
+	loop:	
+		ldy #0
+			
+		// store first bit in ZP3 and shift left
+		lda (ZP1),y
+		asl
+		sta ZP4
+		:IncZp(ZP1)
+			
+		// store second bit in ZP3 and shift left
+		lda (ZP1),y
+		ora ZP4
+		asl
+		sta ZP4
+		:IncZp(ZP1)
+			
+		// store third bit in ZP3 and shift left
+		lda (ZP2),y
+		ora ZP4
+		asl
+		sta ZP4
+		:IncZp(ZP2)
+
+		// store fourth bit in ZP3
+		lda (ZP2),y
+		ora ZP4
+		sta ZP4
+
+		// ZP4+1 is teh value to draw, copy it from acc		
+		tay		
+		:IncZp(ZP2)
 		
-	// store second bit in ZP3 and shift left
-	lda (ZP1),y
-	ora ZP3
-	asl
-	sta ZP3
-
-	:IncZp(ZP1)
+		lda gfxtable,y
 		
-	// store third bit in ZP3 and shift left
-	lda (ZP2),y
-	ora ZP3
-	asl
-	sta ZP3
+		ldy	ZP4+1	
+		sta (ZP3),y
 
-	:IncZp(ZP2)
-
-	// store fourth bit in ZP3
-	lda (ZP2),y
-	ora ZP3
-	sta ZP3
-
-	// y is teh value to draw, copy it from acc
-	tay
-	
-	:IncZp(ZP2)
-	
-	lda $7f00,y 
-	sta vram,x
-
-	// Draw 1 lines of real screen memory (40 chars)
-	inx
-	cpx #$28
-	bne loop
+		// Draw 1 lines of real screen memory (40 chars)
+		inc ZP4+1
+		lda ZP4+1
+		cmp #$28
+		bne loop
 	
 }
 
 
 .macro DrawMemory() {
+
+	// Pointer to the even line VVRAM (ZP1) and odd line VVRAM (ZP2)
+
+	// ZP1 = $4000
+	// ZP2 = $4050
+	// ZP3 = $80A0
 	
-	.for(var i = 0; i < 5; i++) {
-		:DrawVVramLine($8000 + [i * 40], $4000 + [i * 160])
+	lda #$40
+	sta ZP1+1
+	sta ZP2+1
+
+	lda #$00
+	sta ZP1
+		
+	lda #$50
+	sta ZP2
+		
+	lda #$80
+	sta ZP3+1
+	
+	lda #$A0
+	sta ZP3
+	
+	clc
+
+
+	.for(var i = 0; i < 15; i++) {
+
+		:DrawVVramLine()
+	
+		:IncZp4fh(ZP1)
+		:IncZp50h(ZP2)
+		:IncZp28h(ZP3)
+
 	}
+	
 
 }
 
 
 /**
  * Increments ZP address by one
- *
- * Affects: C,A
+ * Be careful, do a CLC before
+ * Affects: CARRY,AC
  */
 .macro IncZp(addr) {
 	// increment (16-bit add by 1)
-	clc
 	lda addr
 	adc #$01
 	sta addr
-	lda addr+1
-	adc #$00
-	sta addr+1	
+	bcc end
+	clc
+	inc addr+1
+	end:
 }
 
 /**
- * Increments ZP address by $A0
- *
- * Affects: C,A
+ * Increments ZP address by $4f
+ * Be careful, do a CLC before
+ * Affects: CARRY,AC
  */
-.macro IncZpDoubleLine(addr) {	
-	clc
+.macro IncZp4fh(addr) {	
 	lda addr
-	adc #$A0
+	adc #$4f
 	sta addr
-	lda addr+1
-	adc #$00
-	sta addr+1	
+	bcc end
+	clc
+	inc addr+1
+	end:
 }
 
-
-
-.pc = $4000 "Virtual video RAM" {
-
- .byte 1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0
- .byte 0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1
- .byte 1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0
- .byte 0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1
- .byte 1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0
- .byte 0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1
- .byte 1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0
- .byte 0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1
- .byte 1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0
- .byte 0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1
- .byte 1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0
- .byte 0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1
- .byte 1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0
- .byte 0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1
- .byte 1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0
- .byte 0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1
- .byte 1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0
- .byte 0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1
- .byte 1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0
- .byte 0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1
- .byte 1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0
- .byte 0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1
- .byte 1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0
- .byte 0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1
+.macro IncZp50h(addr) {	
+	lda addr
+	adc #$50
+	sta addr
+	bcc end
+	clc
+	inc addr+1
+	end:
 }
-//.fill $3f00,0 
 
-.pc = $7f00 "GFX translation table"
+/**
+ * Increments ZP address by $28
+ * Be careful, do a CLC before
+ * Affects: CARRY,AC
+ */
+.macro IncZp28h(addr) {	
+	lda addr
+	adc #$28
+	sta addr
+	bcc end
+	clc
+	inc addr+1
+	end:
+}
 
-// bit order
-// 3 2
-// 1 0
-gfxtable:
- .byte 32,108,123,98,124,97+128,127+128,126+128
- .byte 126,127,97,124+128,98+128,123+128,108+128,160
+.macro ClearVVRAM() {
+
+		// clear carry
+		clc
+		
+		// Load VVRAM address to ZP1
+		lda #$00
+		sta ZP1
+		lda #$40
+		sta ZP1+1
+		
+		ldy #0 // always zero
+		
+		ldx #0 // row
+		
+	loop:
+		
+		// set the pixel value (1 or 0)
+		lda ZP1
+		and #1
+		
+		sta (ZP1),y
+		
+		// inc ZP1 by 1, lower byte		
+		lda ZP1		
+		adc #1
+		sta ZP1
+		bcc endcheck
+		
+		// inc ZP1+1 because carry was set and clear carry
+		inc ZP1+1
+		clc
+
+	endcheck:
+		// check if end is reached ($7e80)
+		lda ZP1+1
+		cmp #$7e 
+		bne loop
+		lda ZP1
+		cmp #$80
+		bne loop
+
+}
 
 // draw zero terminated text
 .macro DrawTextZt(tx, ty, text) {
@@ -305,10 +364,7 @@ gfxtable:
 		
 }
 
-/**
- * reads one byte from the source address and writes two bytes to the target address
- * 
- */
+//reads one byte from the source address and writes two bytes to the target address
 .macro ItoA(target, source) {
 	pha
 	lda source				
@@ -324,7 +380,6 @@ gfxtable:
 	sta target + 1		
 	pla
 }
-
 
 // clear the screen
 .macro ClearScreen() {
