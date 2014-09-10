@@ -146,7 +146,7 @@ orig_isr: 		.dword 	0
 //vvram: .fill VVRAM_SIZE,0
 
 .pc = VVRAM "Virtual Video RAM"
-.var data = LoadBinary("b00lduck.raw")
+.var data = LoadBinary("../data/b00lduck.raw")
 myData: .fill data.getSize(), data.get(i)
 
 

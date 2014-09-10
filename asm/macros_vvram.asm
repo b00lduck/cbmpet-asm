@@ -20,10 +20,10 @@
 	lda #$80
 	sta ZP3+1
 	
-	lda #$A0
+	lda #$28
 	sta ZP3
 	
-	clc
+	//clc
 
 	.for(var i = 0; i < 15; i++) {
 

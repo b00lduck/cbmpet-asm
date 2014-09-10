@@ -1,10 +1,10 @@
 /**
  * Set the interrupt vector to 'addr' and store the original value to 'orig_isr'
- * no regs changed
+ * Affected: AC,ZERO
  */
 .macro InstallIsr(addr) {
 	sei
-	pha
+
 	// save original isr
 	lda ZP_ISR
 	sta orig_isr
@@ -16,22 +16,20 @@
 	sta ZP_ISR
 	lda #>addr
 	sta ZP_ISR + 1
-	pla
+
 	cli
 }
 
 /**
  * Restore the interrupt vector to the old value from 'orig_isr'
- * no regs changed
+ * Affected: AC,ZERO
  */
 .macro RestoreIsr() {
 	sei
-	pha
 	lda orig_isr
 	sta ZP_ISR
 	lda orig_isr + 1
 	sta ZP_ISR + 1
-	pla
 	cli
 }
 
@@ -52,7 +50,7 @@
 } 
 
 // Load address into ZeroPage at offset	
-// no regs changed
+// Affects: ZERO
 .macro loadToZP(addr, value) {
 	pha			// push acc to stack	
 	tya
@@ -88,8 +86,7 @@
 	lda addr
 	adc #val
 	sta addr
-	bcc end
-	clc
+	bcc end	
 	inc addr+1
 	end:
 }
