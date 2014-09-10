@@ -12,5 +12,6 @@ hello3:
 	.text "  by Graf Hardt and Shazman" .byte 0
 hello4:
 	.text "      on a COMMODORE PET" .byte 0
+	
 text1:
-	.text "Elapsed time: 00:00.00    " .byte 0
+	.text "Elapsed time: 00:00.00" .byte 0

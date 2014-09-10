@@ -19,7 +19,7 @@
 		cld
 	
 		:ClearScreen()	
-		//ClearVVRAM()
+		//:ClearVVRAM()
 		:Checkerboard()
 		:SwitchLowercase()
 		
@@ -27,26 +27,50 @@
 		:DrawTextZt(2, 2, hello2)
 		:DrawTextZt(6, 20, hello3)
 		//:DrawTextZt(6, 22, hello4)
-						
+			
 		:InstallIsr(isr)		
 				
 	mainloop:	
 
+		lda #$00		
+		sta $E848	
+		sta $E849	
+
 		:DrawMemory()
-		//:DrawOuterBox(framecount)		
+		//DrawOuterBox(framecount)	
+
+		// copy addr to zp1
+		lda $e848
+		sta ZP1
+		lda $e849	
+		sta ZP1+1			
+		
+		// substract ZP1 from FFFF
+        sec             // Ensure carry is set
+        lda #$ff        // Subtract the two least significant bytes
+        sbc ZP1
+        sta ZP2         // ... and store the result in ZP2
+        lda #$ff        // Subtract the two most significant bytes
+        sbc ZP1+1       // ... and any propagated borrow bit
+        sta ZP2+1       // ... and store the result	in ZP2
+				
+		:DisplayHexWord(ZP2,$83bb)
+		
 		
 		:ItoA(text1 + 14, minutes)		
 		:ItoA(text1 + 17, seconds)		
-		:ItoA(text1 + 20, frames)		
+		:ItoA(text1 + 20, frames)				
+				
 		:DrawTextZt(1, 23, text1)		
+		
+		
 		
 		lda $97
 		cmp #$ff		// check for keystroke
 		
-		bne end
+		bne end					
 		
-		jmp mainloop
-	
+		jmp mainloop	
 		
 	end:		
 		lda #$00
@@ -102,6 +126,8 @@
 	.import source "data.asm"
 
 }	
+
+perfcount: 		.byte 	0
 
 framecount: 	.dword 	0
 
