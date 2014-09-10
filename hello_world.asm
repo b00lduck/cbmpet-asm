@@ -3,10 +3,17 @@
  * compatible with BASIC V2
  * written in September 2014
  *
+ * b00lduck on AVR - check!
+ * b00lduck on x86 - check!
+ * b00lduck on ARM - check!
  * b00luck on 6502 - check!
+ * b00lduck on 68000 - to come
  */
 .import source "config.asm"
 .import source "macros.asm"
+.import source "macros_text.asm"
+.import source "macros_vram.asm"
+.import source "macros_vvram.asm"
 
 .pc = BASIC "Basic upstart" {
 	:BasicUpstart(MAIN)
@@ -14,8 +21,7 @@
 
 .pc = MAIN "Main code" {
 	
-	start:			
-	
+	start:				
 		cld
 	
 		:ClearScreen()	
