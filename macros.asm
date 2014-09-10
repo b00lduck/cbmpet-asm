@@ -118,19 +118,19 @@
 	
 		// index of the graphics table value (0-15)
 		lda #0
-		sta ZP4
+		sta ZP4	
 
 		// offset counter
 		lda #0
 		sta ZP4+1
 		
 	loop:	
-		ldy #0
-			
+					
 		// store first bit in ZP3 and shift left
-		lda (ZP1),y
-		asl
-		sta ZP4
+		ldy #0			// 2
+		lda (ZP1),y		// 5
+		asl				// 2	
+		sta ZP4			// 3							
 		:IncZp(ZP1)
 			
 		// store second bit in ZP3 and shift left
@@ -211,21 +211,15 @@
 }
 
 
-/**
- * Increments ZP address by one
- * Be careful, do a CLC before
- * Affects: CARRY,AC
- */
+// Increments ZP address 
+// Affects: Z
 .macro IncZp(addr) {
-	// increment (16-bit add by 1)
-	lda addr
-	adc #$01
-	sta addr
-	bcc end
-	clc
-	inc addr+1
+	inc addr		// increment ZP1
+	bne end  		// if ZP1 is zero, increment high byte
+	inc addr+1		
 	end:
 }
+
 
 /**
  * Increments ZP address by $4f
