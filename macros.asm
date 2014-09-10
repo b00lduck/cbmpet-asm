@@ -261,7 +261,7 @@
 		e13: lda #226  jmp draw		
 		e14: lda #251  jmp draw
 		e15: lda #236  jmp draw
-		e16: lda #128  jmp draw
+		e16: lda #160  jmp draw
 			
 	draw:
 	
@@ -278,6 +278,12 @@
 		lda ZP4
 		cmp #$28
 		beq end
+		
+		
+		:IncZp8(ZP1,$02)
+		:IncZp8(ZP2,$02)
+		
+		
 		jmp loop
 		
 		
@@ -317,8 +323,8 @@
 		//:DrawVVramLine()
 		:DrawVVramLineV2()
 	
-		:IncZp8(ZP1,$A0)
-		:IncZp8(ZP2,$A0)
+		:IncZp8(ZP1,$52)
+		:IncZp8(ZP2,$52)
 		:IncZp8(ZP3,$28)
 
 	}

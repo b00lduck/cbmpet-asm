@@ -20,11 +20,10 @@
 	
 		:ClearScreen()	
 		//:ClearVVRAM()
-		:Checkerboard()
+		//:Checkerboard()
 		:SwitchLowercase()
 		
-		:DrawTextZt(4, 0, hello1)
-		:DrawTextZt(2, 2, hello2)
+		:DrawTextZt(2, 19, hello2)
 		:DrawTextZt(6, 20, hello3)
 		//:DrawTextZt(6, 22, hello4)
 			
@@ -137,8 +136,12 @@ minutes: 		.byte 	0
        
 orig_isr: 		.dword 	0
 
-.pc = VVRAM "Virtual Video RAM" virtual
-vvram: .fill VVRAM_SIZE,0
+//.pc = VVRAM "Virtual Video RAM" virtual
+//vvram: .fill VVRAM_SIZE,0
+
+.pc = VVRAM "Virtual Video RAM"
+.var data = LoadBinary("b00lduck.raw")
+myData: .fill data.getSize(), data.get(i)
 
 
 
