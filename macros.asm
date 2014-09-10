@@ -285,6 +285,7 @@
 	
 }
 
+
 .macro DrawMemory() {
 
 	// Pointer to the even line VVRAM (ZP1) and odd line VVRAM (ZP2)
@@ -311,16 +312,16 @@
 	
 	clc
 
-	//.for(var i = 0; i < 3; i++) {
+	.for(var i = 0; i < 15; i++) {
 
 		//:DrawVVramLine()
 		:DrawVVramLineV2()
 	
-		:IncZp4fh(ZP1)
-		:IncZp50h(ZP2)
-		:IncZp28h(ZP3)
+		:IncZp8(ZP1,$A0)
+		:IncZp8(ZP2,$A0)
+		:IncZp8(ZP3,$28)
 
-	//}
+	}
 
 }
 
@@ -334,38 +335,13 @@
 }
 
 /**
- * Increments ZP address by $4f
- * Be careful, do a CLC before
- * Affects: CARRY,AC
- */
-.macro IncZp4fh(addr) {	
-	lda addr
-	adc #$4f
-	sta addr
-	bcc end
-	clc
-	inc addr+1
-	end:
-}
-
-.macro IncZp50h(addr) {	
-	lda addr
-	adc #$50
-	sta addr
-	bcc end
-	clc
-	inc addr+1
-	end:
-}
-
-/**
  * Increments ZP address by $28
- * Be careful, do a CLC before
- * Affects: CARRY,AC
+  * Affects: CARRY,AC
  */
-.macro IncZp28h(addr) {	
+.macro IncZp8(addr, val) {	
+	clc
 	lda addr
-	adc #$28
+	adc #val
 	sta addr
 	bcc end
 	clc
