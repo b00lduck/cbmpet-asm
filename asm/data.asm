@@ -13,3 +13,8 @@ hello4:
 	
 text1:
 	.text "Elapsed time: 00:00.00" .byte 0
+	
+
+.var image1Data = LoadBinary("../data/b00lduck.rle")
+image1: .fill image1Data.getSize(), image1Data.get(i)
+image1_size: .word image1Data.getSize()

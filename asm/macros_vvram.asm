@@ -265,6 +265,74 @@
 
 }
 
+.macro LoadImage() {
+
+	init:
+		// Load VVRAM address to ZP1
+		lda #$00
+		sta ZP1
+		lda #$40
+		sta ZP1+1
+		
+		// Load Image address to ZP2
+		lda #<image1
+		sta ZP2
+		lda #>image1
+		sta ZP2+1
+		
+		// Load Image length to ZP3
+		lda image1_size
+		sta ZP3
+		lda image1_size+1
+		sta ZP3+1	
+		
+		// Set ZP4 to current state 0 (0 or 1)
+		lda #0
+		sta ZP4
+			
+	outerloop:
+		// Load one compressed byte from the image pointer ZP2 and copy it to x
+		ldy #0	
+		lda (ZP2),y
+		tay
+	
+	innerloop:
+		lda ZP4
+		sta (ZP1),y
+		dey
+		bne innerloop
+
+		// last byte (which is the first in fact at offset 0)
+		lda ZP4
+		sta (ZP1),y
+		
+		// flip current state
+		lda ZP4
+		eor #1
+		sta ZP4
+		
+	inc_zp1:
+		// add length of recently added bytes to ZP1, the target VVRAM
+		clc
+		ldy #0
+		lda (ZP2),y		
+		adc ZP1
+		sta ZP1
+		bcc inc_zp2
+		inc ZP1+1		
+
+	inc_zp2:
+		clc
+		lda #1
+		adc ZP2
+		sta ZP2
+		bcc next
+		inc ZP2+1
+		
+	next:
+	
+		brk
+}
 
 .macro Checkerboard() {
 
