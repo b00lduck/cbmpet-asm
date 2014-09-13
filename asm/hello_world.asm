@@ -30,7 +30,7 @@
 		:LoadImage()
 		:SwitchLowercase()
 		
-		:DrawTextZt(2, 19, hello2)
+		:DrawTextZt(2, 18, hello2)
 		:DrawTextZt(6, 20, hello3)
 		//:DrawTextZt(6, 22, hello4)
 			

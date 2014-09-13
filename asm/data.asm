@@ -7,7 +7,7 @@ gfxtable:
 hello2:
 	.text "vintage COMMODORE PET assembly code" .byte 0
 hello3:
-	.text "  by Graf Hardt and Shazman" .byte 0
+	.text "  by Graf Hardt and Dr.Ergo" .byte 0
 hello4:
 	.text "      on a COMMODORE PET" .byte 0
 	

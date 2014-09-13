@@ -1,5 +1,6 @@
 package com.b00lduck.pet.image_converter;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,12 +13,23 @@ import java.util.List;
  * 
  */
 public class ImageConverter {
+	
+	byte currentSubject = 0;
+	Integer currentCount = 0;
+	
+	private static Integer MAX = 254;
 
 	public static void main(String[] args) throws IOException {
 
 		ImageConverter imageConverter = new ImageConverter();
 	    
-		byte[] bytes = imageConverter.readBinaryFile("D:\\PET\\data\\b00lduck.raw");
+		imageConverter.convert("D:\\PET\\data\\b00lduck.raw", "D:\\PET\\data\\b00lduck.rle");
+		
+	}
+	
+	public void convert(String src, String dest) throws IOException {
+		
+		byte[] bytes = readBinaryFile(src);
 			    
 	    // Special RL encoding
 	    //
@@ -26,46 +38,63 @@ public class ImageConverter {
 	    // number of 0s etc.
 	    
 	    List<Integer> output = new ArrayList<>();
-	    
-	    Integer currentCount = 0;
-	    byte currentSubject = 0; // 0 or 1
-	    
-	    for(byte b : bytes) {
+	    	        	    
+	    for(int i = 0; i < bytes.length; i++) {
 	    	
-	    	if ((b == currentSubject) && (currentCount < 255)) {	    		
-	    		currentCount++;	    		
-	    	} else {
-	    			    		
-	    		if (currentSubject == 0) {
-	    			currentSubject = 1;
-	    		} else {
-	    			currentSubject = 0;
-	    		}
+	    	if (bytes[i] == currentSubject) {	    		
 	    		
-	    		output.add(currentCount);
-	    		currentCount = 0;
+	    		currentCount++;	    		
+	    	
+	    	} else {
+	    		
+	    		i--;
+	    		
+	    		while (currentCount > MAX) {
+	    			
+	    			System.out.println(currentSubject + ":" + String.format("0x%2s", Integer.toHexString(MAX).toUpperCase()).replace(' ', '0'));
+	    			output.add(MAX);
+
+	    			System.out.println(flippedCurrentSubject(currentSubject) + ":" + String.format("0x%2s", Integer.toHexString(0).toUpperCase()).replace(' ', '0'));
+	    			output.add(0);
+	    			
+	    			currentCount -= MAX;	    			
+	    			
+	    		}
+
+	    		System.out.println(currentSubject + ":" + String.format("0x%2s", Integer.toHexString(currentCount).toUpperCase()).replace(' ', '0'));
+		    	output.add(currentCount);
+		    	
+		    	currentCount = 0;
+	    		
+		    	currentSubject = flippedCurrentSubject(currentSubject);
+		    	
+				    	
+		    				    			    		
 	    	}
 	    	
 	    }
 	    
-	    byte[] out = new byte[output.size()];
-	    int i = 0;
-	    
-	    for (Integer x : output) {
+	    FileOutputStream fos = new FileOutputStream(dest);	    
+	        
+	    for (Integer x : output) {	    
 	    	
-	    	out[i] = x.byteValue();
-	    	i++;
+	    	byte i = (byte) (x & 0xff);
+	    	
+	    	fos.write(i);
 	    }
+	    fos.close();
 	    
-	    imageConverter.writeSmallBinaryFile(out, "D:\\PET\\data\\b00lduck.rle");		
-		
-		//byte[] x = readBinaryFile("D:\\PET\\data\\b00lduck.raw");
-
-		
-		
+	
 		
 	}
-
+	
+	private byte flippedCurrentSubject(byte cs) {
+		if (cs == 0) {
+			return 1;
+		} else {
+			return 0;
+		}		
+	}
 	
 	private byte[] readBinaryFile(final String filename)
 			throws IOException {

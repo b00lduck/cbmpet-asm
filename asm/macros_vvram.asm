@@ -25,7 +25,7 @@
 	
 	//clc
 
-	.for(var i = 0; i < 15; i++) {
+	.for(var i = 0; i < 16; i++) {
 
 		//:DrawVVramLine()
 		:DrawVVramLineV2()
@@ -274,7 +274,7 @@
 		lda #$40
 		sta ZP1+1
 		
-		// Load Image address to ZP2
+		// Load src Image address to ZP2
 		lda #<image1
 		sta ZP2
 		lda #>image1
@@ -326,12 +326,26 @@
 		lda #1
 		adc ZP2
 		sta ZP2
-		bcc next
+		bcc dec_zp3
 		inc ZP2+1
 		
-	next:
+	dec_zp3:
+		sec
+		lda ZP3
+		sbc #1
+		sta ZP3
+		lda ZP3+1
+		sbc #0
+		sta ZP3+1
+		
+	end_check:
+		lda ZP3+1
+		cmp #$ff
+		bne outerloop
+		lda ZP3
+		cmp #$ff
+		bne outerloop
 	
-		brk
 }
 
 .macro Checkerboard() {
