@@ -16,8 +16,41 @@
 .import source "macros_vvram.asm"
 
 .pc = BASIC "Basic upstart" {
-	:BasicUpstart(MAIN)
+
+!:	.word !+
+	.byte 1, $00
+rp:	.byte $9e, $20
+	.byte $31, $33, $33, $37
+	.text ":"
+	.byte $9b,0
+!:	.word !+
+	.byte 2, $00
+	.byte $8f, $20
+	.text "PET-A-BYTE"
+	.byte 0
+!:	.word !+
+	.byte 3, $00
+	.byte $8f, $20
+	.text "      BY B00LDUCK"
+	.byte 0	
+!:	.word !+
+	.byte 5,$00
+	.byte $8f, $20
+	.text "CODE:  GRAF HARDT"
+	.byte 0
+!:	.word !+
+	.byte 7, $00
+	.byte $8f, $20
+	.text "HARDWARE: DR ERGO"
+	.byte 0
+!:	.word !+
+	.byte 11, $00
+	.byte $80
+	.byte 0	
+	
+!:	.byte 0,0
 }
+
 
 .pc = MAIN "Main code" {
 	
@@ -83,7 +116,8 @@
 		sta $9e	// set keyboard buffer len to $00		
 	    :RestoreIsr()
 		:ClearHome()			
-		:SwitchGraphics()				
+		:SwitchGraphics()			
+		
 		rts
 
 		
