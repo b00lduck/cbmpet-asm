@@ -31,7 +31,8 @@ rp:	.byte $9e, $20
 !:	.word !+
 	.byte 3, $00
 	.byte $8f, $20
-	.text "      BY B00LDUCK"
+	.text "      "
+	.text "BY B00LDUCK"
 	.byte 0	
 !:	.word !+
 	.byte 5,$00
@@ -65,16 +66,18 @@ rp:	.byte $9e, $20
 		
 		:DrawTextZt(2, 18, hello2)
 		:DrawTextZt(6, 20, hello3)
-		//:DrawTextZt(6, 22, hello4)
+		
 			
 		:InstallIsr(isr)		
-				
+						
 	mainloop:	
 
 		lda #$00		
 		sta $E848	
 		sta $E849	
 
+		//:DrawMemoryRandom()
+		
 		:DrawMemory()
 		//DrawOuterBox(framecount)	
 
@@ -178,12 +181,7 @@ minutes: 		.byte 	0
 orig_isr: 		.dword 	0
 
 .pc = VVRAM "Virtual Video RAM" virtual
-vvram: .fill VVRAM_SIZE,0
-
-//.pc = VVRAM "Virtual Video RAM"
-//.var data = LoadBinary("../data/b00lduck.raw")
-//myData: .fill data.getSize(), data.get(i)
-
+vvram:
 
 
 

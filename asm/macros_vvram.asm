@@ -38,6 +38,46 @@
 
 }
 
+.macro DrawMemoryRandom() {
+
+	// Pointer to the even line VVRAM (ZP1) and odd line VVRAM (ZP2)
+
+	// ZP1 = $4000
+	// ZP2 = $4050
+	// ZP3 = $80A0
+	
+	lda #$40
+	sta ZP1+1
+	sta ZP2+1
+
+	lda #$00
+	sta ZP1
+		
+	lda #$50
+	sta ZP2
+		
+	lda #$80
+	sta ZP3+1
+	
+	lda #$28
+	sta ZP3
+	
+	//clc
+
+	.for(var i = 0; i < 16; i++) {
+
+		//:DrawVVramLine()
+		:DrawVVramLineV2()
+	
+		:IncZp8(ZP1,$52)
+		:IncZp8(ZP2,$52)
+		:IncZp8(ZP3,$28)
+
+	}
+
+}
+
+
 
 // Draw one line of VVRAM to VRAM
 // ZP1: VVRAM even line address
@@ -99,19 +139,55 @@
 	
 }
 
+// Draws one char, consisting of 4 virtual pixels to VRAM.
+// ZP1 even line vvram ptr, pointing to begin of line
+// ZP2 odd line vvram ptr, pointing to begin of line
+// ZP3 vram line ptr, pointing to begin of line
+// ZP4 offset in vram line
+.macro DrawConvertedPixel() {
+	
+	:ConvertPixel()	
+	ldy	ZP4
+	sta (ZP3),y
+}
+
+// Draw 1 lines of real screen memory (40 chars)
 .macro DrawVVramLineV2() {
 	
-		// offset counter
-		lda #0
+		// set x=0 for ConvertPixel()
+		// set in-line offset counter to 0
+		lax #0 // illegal opcode for lda/ldx
 		sta ZP4
-		
-		ldx #0
-		
+				
 	loop:	
+
+		:DrawConvertedPixel()
+		
+		// Increment in line pointer
+		inc ZP4
+		lda ZP4
+		cmp #$28
+		beq end		
+		
+		// Increment VVRAM pointers by 2
+		:IncZp8(ZP1,$02)
+		:IncZp8(ZP2,$02)
+				
+		jmp loop		
+		
+	end:
 	
-		ldy #1
+}
+
+// ZP1 even line ptr
+// ZP2 odd line ptr
+// RX needs to be 0
+// Return value is in ACC
+// Affects: ACC,RY
+.macro ConvertPixel() {
 	
-		a1:	
+			ldy #1	
+		
 			lda (ZP1,x)		// 6
 			bne b2
 			
@@ -126,7 +202,8 @@
 		d1: 
 			lda (ZP2),y		// 5
 			bne e2
-			jmp e1
+			lda #32
+			jmp draw		
 			
 		b2:
 			lda (ZP1),y		// 6		
@@ -139,7 +216,8 @@
 		d5: 
 			lda (ZP2),y		// 6
 			bne e10
-			jmp e9
+			lda #126
+			jmp draw	
 			
 		c2:
 			lda (ZP2,x)		// 5
@@ -148,7 +226,8 @@
 		d3: 
 			lda (ZP2),y		// 6
 			bne e6
-			jmp e5
+			lda #124
+			jmp draw
 			
 		c4:
 			lda (ZP2,x)		// 5
@@ -157,70 +236,43 @@
 		d7:
 			lda (ZP2),y		// 6
 			bne e14
-			jmp e13
+			lda #226
+			jmp draw
 			
 		d2:
 			lda (ZP2),y		// 6
 			bne e4
-			jmp e3
+			lda #123
+			jmp draw
 			
 		d4: 
 			lda (ZP2),y		// 6
 			bne e8
-			jmp e7
+			lda #255
+			jmp draw	
 			
 		d6:
 			lda (ZP2),y		// 6
 			bne e12
-			jmp e11
+			lda #97
+			jmp draw
 
 		d8:
 			lda (ZP2),y		// 6
 			bne e16
-			jmp e15	
-		
-		e1:	 lda #32   jmp draw		
+			lda #236
+			jmp draw	
+				
 		e2:	 lda #108  jmp draw
-		e3:	 lda #123  jmp draw		
 		e4:	 lda #98   jmp draw
-		e5:	 lda #124  jmp draw		
 		e6:	 lda #225  jmp draw
-		e7:	 lda #255  jmp draw		
 		e8:	 lda #254  jmp draw
-		e9:	 lda #126  jmp draw		
 		e10: lda #127  jmp draw
-		e11: lda #97   jmp draw		
 		e12: lda #252  jmp draw
-		e13: lda #226  jmp draw		
 		e14: lda #251  jmp draw
-		e15: lda #236  jmp draw
 		e16: lda #160  jmp draw
 			
 	draw:
-	
-		// y is teh value to draw, copy it from acc		
-		//tay		
-		
-		//lda gfxtable,y
-		
-		ldy	ZP4
-		sta (ZP3),y
-
-		// Draw 1 lines of real screen memory (40 chars)
-		inc ZP4
-		lda ZP4
-		cmp #$28
-		beq end
-		
-		
-		:IncZp8(ZP1,$02)
-		:IncZp8(ZP2,$02)
-		
-		
-		jmp loop
-		
-		
-		end:
 	
 }
 

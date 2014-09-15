@@ -8,4 +8,13 @@
 .const ZP2=$e2
 .const ZP3=$e4
 .const ZP4=$e6
+.const ZP5=$e8
+.const ZP6=$ea
+.const ZP7=$ec
+.const ZP8=$ee
+.const ZP9=$f0
+.const ZP10=$f1
+.const ZP11=$f2
+.const ZP12=$f3
+.const ZP13=$f4
 .const ZP_ISR=$90
