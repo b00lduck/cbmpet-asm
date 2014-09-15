@@ -25,9 +25,8 @@
 	
 	//clc
 
-	.for(var i = 0; i < 16; i++) {
+	.for(var i = 0; i < 2; i++) {
 
-		//:DrawVVramLine()
 		:DrawVVramLineV2()
 	
 		:IncZp8(ZP1,$52)
@@ -36,119 +35,6 @@
 
 	}
 
-}
-
-.macro DrawMemoryRandom() {
-
-	// Pointer to the even line VVRAM (ZP1) and odd line VVRAM (ZP2)
-
-	// ZP1 = $4000
-	// ZP2 = $4050
-	// ZP3 = $80A0
-	
-	lda #$40
-	sta ZP1+1
-	sta ZP2+1
-
-	lda #$00
-	sta ZP1
-		
-	lda #$50
-	sta ZP2
-		
-	lda #$80
-	sta ZP3+1
-	
-	lda #$28
-	sta ZP3
-	
-	//clc
-
-	.for(var i = 0; i < 16; i++) {
-
-		//:DrawVVramLine()
-		:DrawVVramLineV2()
-	
-		:IncZp8(ZP1,$52)
-		:IncZp8(ZP2,$52)
-		:IncZp8(ZP3,$28)
-
-	}
-
-}
-
-
-
-// Draw one line of VVRAM to VRAM
-// ZP1: VVRAM even line address
-// ZP2: VVRAM odd line address
-// ZP3: VRAM line address
-// Affects: AC,YR,Z,C
-.macro DrawVVramLine() {
-	
-		// index of the graphics table value (0-15)
-		lda #0
-		sta ZP4
-
-		// offset counter
-		lda #0
-		sta ZP4+1
-		
-	loop:	
-					
-		// store first bit in ZP3 and shift left
-		ldy #0			// 2
-		lda (ZP1),y		// 5
-		asl				// 2	
-		sta ZP4			// 3							
-		:IncZp(ZP1)
-			
-		// store second bit in ZP3 and shift left
-		lda (ZP1),y
-		ora ZP4
-		asl
-		sta ZP4
-		:IncZp(ZP1)
-			
-		// store third bit in ZP3 and shift left
-		lda (ZP2),y
-		ora ZP4
-		asl
-		sta ZP4
-		:IncZp(ZP2)
-
-		// store fourth bit in ZP3
-		lda (ZP2),y
-		ora ZP4
-		sta ZP4
-
-		// ZP4+1 is teh value to draw, copy it from acc		
-		tay		
-		:IncZp(ZP2)
-		
-		lda gfxtable,y
-		
-		ldy	ZP4+1	
-		sta (ZP3),y
-
-		// Draw 1 lines of real screen memory (40 chars)
-		inc ZP4+1
-		lda ZP4+1
-		cmp #$28
-		bne loop
-	
-}
-
-// Draws one char, consisting of 4 virtual pixels to VRAM.
-// ZP1 even line vvram ptr, pointing to begin of line
-// ZP2 odd line vvram ptr, pointing to begin of line
-// ZP3 vram line ptr, pointing to begin of line
-// ZP4 offset in vram line
-.macro DrawConvertedPixel() {
-	
-	:ConvertPixel()	
-	ldy	ZP4
-	sta (ZP3),y
 }
 
 // Draw 1 lines of real screen memory (40 chars)
@@ -161,13 +47,21 @@
 				
 	loop:	
 
-		:DrawConvertedPixel()
+		// ZP1 even line vvram ptr, pointing to begin of line
+		// ZP2 odd line vvram ptr, pointing to begin of line
+		// ZP3 vram line ptr, pointing to begin of line
+		// ZP4 offset in vram line
+		:ConvertPixel()	
 		
-		// Increment in line pointer
-		inc ZP4
-		lda ZP4
-		cmp #$28
-		beq end		
+		// Store to VRAM
+		ldy	ZP4
+		sta (ZP3),y
+		
+		// Increment in line pointer		
+		iny
+		sty ZP4
+		cpy #$28
+		beq end
 		
 		// Increment VVRAM pointers by 2
 		:IncZp8(ZP1,$02)
@@ -185,6 +79,8 @@
 // Return value is in ACC
 // Affects: ACC,RY
 .macro ConvertPixel() {
+
+		
 	
 			ldy #1	
 		
@@ -202,7 +98,7 @@
 		d1: 
 			lda (ZP2),y		// 5
 			bne e2
-			lda #32
+			lda #32			// space
 			jmp draw		
 			
 		b2:
@@ -270,13 +166,11 @@
 		e10: lda #127  jmp draw
 		e12: lda #252  jmp draw
 		e14: lda #251  jmp draw
-		e16: lda #160  jmp draw
+		e16: lda #160
 			
 	draw:
 	
 }
-
-
 
 .macro ClearVVRAM() {
 
