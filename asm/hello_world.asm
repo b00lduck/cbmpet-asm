@@ -60,8 +60,9 @@ rp:	.byte $9e, $20
 	
 		:ClearScreen()	
 		//:ClearVVRAM()
-		//:Checkerboard()
-		:LoadImage()
+		//:Checkerboard2()
+		//:LoadImage()
+		:LoadImageNA()
 		:SwitchLowercase()
 		
 		:DrawTextZt(2, 18, hello2)
@@ -72,13 +73,14 @@ rp:	.byte $9e, $20
 						
 	mainloop:	
 
+		// ??
 		lda #$00		
 		sta $E848	
 		sta $E849	
 
 		//:DrawMemoryRandom()
-		
-		:DrawMemory()
+		//:DrawMemory()
+		:DrawMemoryNA()
 		//DrawOuterBox(framecount)	
 
 		// copy addr to zp1
@@ -88,24 +90,21 @@ rp:	.byte $9e, $20
 		sta ZP1+1			
 		
 		// substract ZP1 from FFFF
-        sec             // Ensure carry is set
-        lda #$ff        // Subtract the two least significant bytes
+        sec             
+        lda #$ff        
         sbc ZP1
-        sta ZP2         // ... and store the result in ZP2
-        lda #$ff        // Subtract the two most significant bytes
-        sbc ZP1+1       // ... and any propagated borrow bit
-        sta ZP2+1       // ... and store the result	in ZP2
+        sta ZP2         
+        lda #$ff        
+        sbc ZP1+1       
+        sta ZP2+1       
 				
-		:DisplayHexWord(ZP2,$83bb)
-		
+		:DisplayHexWord(ZP2,$83bb)		
 		
 		:ItoA(text1 + 14, minutes)		
 		:ItoA(text1 + 17, seconds)		
 		:ItoA(text1 + 20, frames)				
 				
 		:DrawTextZt(1, 23, text1)		
-		
-		
 		
 		lda $97
 		cmp #$ff		// check for keystroke
@@ -179,6 +178,10 @@ seconds: 		.byte 	0
 minutes: 		.byte 	0
        
 orig_isr: 		.dword 	0
+
+lut:			.byte 	$20,$7e,$7c,98+128,123,97,127+128,108+128,108,127,97+128,123+128,98,124+128,126+128,160
+lut1:			.byte   $20,$6c,$7b,$62,$7c,$e1,$ff,$fe,$7e,$7f,$61,$fc,$e2,$fb,$ec,$a0
+		
 
 .pc = VVRAM "Virtual Video RAM" virtual
 vvram:

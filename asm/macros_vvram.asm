@@ -1,3 +1,89 @@
+.macro DrawMemoryNA() {
+
+	// Pointer to the VVRAM line (ZP1)
+
+	// ZP1 = $4000
+	// ZP3 = $80A0
+	
+	lda #$40
+	sta ZP1+1
+	lda #$00
+	sta ZP1
+			
+	lda #$80
+	sta ZP3+1	
+	lda #$28
+	sta ZP3
+	
+	.for(var i = 0; i < 16; i++) {
+		:DrawVVramLineNA()	
+		:IncZp8(ZP1,$14)
+		:IncZp8(ZP3,$28)
+	}
+
+}
+
+
+// Draw 1 line of real VRAM (40 chars)
+.macro DrawVVramLineNA() {
+	
+		// set VRAM in-line offset counter to 0
+		lda #$00
+		sta ZP10
+
+		// set VVRAM in-line offset counter to 0
+		lda #$00
+		sta ZP11
+						
+	loop:	
+
+		// ZP1 vvram line ptr, pointing to begin of line
+		// ZP3 vram line ptr, pointing to begin of line
+		// ZP10 offset in vram line		
+		// ZP11 offset in vvram line		
+		
+		// fetch one half byte from VVRAM
+		ldy ZP11
+		lda (ZP1),y
+		pha	// save to stack
+		lsr
+		lsr
+		lsr
+		lsr		
+		
+		// look up value in lookup table
+		tax
+		lda lut1,x	
+
+						
+		// Store to VRAM
+		ldy	ZP10
+		sta (ZP3),y
+		inc ZP10
+		
+
+		// fetch other half byte with help from stack
+		pla		
+		and #$0f
+
+		// look up value in lookup table
+		tax
+		lda lut1,x		
+						
+		// Store to VRAM
+		ldy	ZP10
+		sta (ZP3),y
+		inc ZP10
+		
+		// Increment in line pointer		
+		inc ZP11		
+		lda ZP11
+		cmp #$14	
+		bne loop
+
+}
+
+
 
 .macro DrawMemory() {
 
@@ -23,16 +109,11 @@
 	lda #$28
 	sta ZP3
 	
-	//clc
-
-	.for(var i = 0; i < 2; i++) {
-
-		:DrawVVramLineV2()
-	
+	.for(var i = 0; i < 16; i++) {
+		:DrawVVramLineV2()	
 		:IncZp8(ZP1,$52)
 		:IncZp8(ZP2,$52)
 		:IncZp8(ZP3,$28)
-
 	}
 
 }
@@ -40,19 +121,39 @@
 // Draw 1 lines of real screen memory (40 chars)
 .macro DrawVVramLineV2() {
 	
-		// set x=0 for ConvertPixel()
 		// set in-line offset counter to 0
-		lax #0 // illegal opcode for lda/ldx
+		lda #$00
 		sta ZP4
-				
+							
 	loop:	
 
 		// ZP1 even line vvram ptr, pointing to begin of line
 		// ZP2 odd line vvram ptr, pointing to begin of line
 		// ZP3 vram line ptr, pointing to begin of line
-		// ZP4 offset in vram line
-		:ConvertPixel()	
+		// ZP4 offset in vram line		
+		//:ConvertPixel2()	
+				
+		lax #0
+		ldy #1
 		
+		// last bit (MSB)		
+		lda (ZP2),y
+		asl
+		
+		ora (ZP2,x)
+		asl
+		
+		// second bit
+		ora (ZP1),y
+		asl
+		
+		// first bit (LSB)
+		ora (ZP1,x)
+
+		// look up value in lookup table
+		tax
+		lda lut,x		
+						
 		// Store to VRAM
 		ldy	ZP4
 		sta (ZP3),y
@@ -60,7 +161,7 @@
 		// Increment in line pointer		
 		iny
 		sty ZP4
-		cpy #$28
+		cpy #$28	
 		beq end
 		
 		// Increment VVRAM pointers by 2
@@ -69,19 +170,30 @@
 				
 		jmp loop		
 		
+	end:	
+}
+
+.macro IncZP1() {
+		inc ZP1
+		bne end
+		inc ZP1+1
 	end:
-	
+}
+
+.macro IncZP2() {
+		inc ZP2
+		bne end
+		inc ZP2+1
+	end:
 }
 
 // ZP1 even line ptr
 // ZP2 odd line ptr
 // RX needs to be 0
 // Return value is in ACC
-// Affects: ACC,RY
+// Affects: ACC,YR
 .macro ConvertPixel() {
 
-		
-	
 			ldy #1	
 		
 			lda (ZP1,x)		// 6
@@ -132,7 +244,7 @@
 		d7:
 			lda (ZP2),y		// 6
 			bne e14
-			lda #226
+			lda #226		// e13
 			jmp draw
 			
 		d2:
@@ -144,29 +256,29 @@
 		d4: 
 			lda (ZP2),y		// 6
 			bne e8
-			lda #255
+			lda #$ff
 			jmp draw	
 			
 		d6:
 			lda (ZP2),y		// 6
 			bne e12
-			lda #97
+			lda #97			
 			jmp draw
 
 		d8:
 			lda (ZP2),y		// 6
 			bne e16
-			lda #236
+			lda #236		// e15
 			jmp draw	
 				
-		e2:	 lda #108  jmp draw
-		e4:	 lda #98   jmp draw
-		e6:	 lda #225  jmp draw
-		e8:	 lda #254  jmp draw
-		e10: lda #127  jmp draw
-		e12: lda #252  jmp draw
-		e14: lda #251  jmp draw
-		e16: lda #160
+		e2:	 lda #$6c  jmp draw
+		e4:	 lda #$62  jmp draw
+		e6:	 lda #$e1  jmp draw
+		e8:	 lda #$fe  jmp draw
+		e10: lda #$7f  jmp draw
+		e12: lda #$fc  jmp draw
+		e14: lda #$fb  jmp draw
+		e16: lda #$a0
 			
 	draw:
 	
@@ -211,6 +323,61 @@
 
 }
 
+.macro LoadImageNA() {
+
+	init:
+		// Load VVRAM address to ZP1
+		lda #$00
+		sta ZP1
+		lda #$40
+		sta ZP1+1
+		
+		// Load src Image address to ZP2
+		lda #<image2
+		sta ZP2
+		lda #>image2
+		sta ZP2+1
+		
+		// Load Image end address to ZP3
+		lda #<image2+320
+		sta ZP3
+		lda #>image2+320
+		sta ZP3+1	
+		
+	loop:
+	
+		ldy #0
+		lda (ZP2),y
+		sta (ZP1),y
+		
+	
+		clc
+		lda #1
+		adc ZP1
+		sta ZP1
+		bcc !+
+		inc ZP1+1			
+		
+	!: 
+		clc
+		lda #1
+		adc ZP2
+		sta ZP2
+		bcc !+
+		inc ZP2+1
+	!:
+
+		lda ZP3
+		cmp ZP2		
+		bne loop
+		
+		lda ZP3+1
+		cmp ZP2+1
+		
+		bne loop
+
+}
+
 .macro LoadImage() {
 
 	init:
@@ -237,7 +404,7 @@
 		sta ZP4
 			
 	outerloop:
-		// Load one compressed byte from the image pointer ZP2 and copy it to x
+		// Load one compressed byte from the image pointer ZP2 and copy it to y
 		ldy #0	
 		lda (ZP2),y
 		tay
@@ -268,6 +435,7 @@
 		inc ZP1+1		
 
 	inc_zp2:
+		// add 1 to ZP2, the RLE source image
 		clc
 		lda #1
 		adc ZP2
@@ -355,6 +523,37 @@
 		bne loop
 		lda ZP1
 		cmp #$80
+		bne loop
+
+}
+
+.macro Checkerboard2() {
+	
+		// Load VVRAM address to ZP1
+		lda #$00
+		sta ZP1
+		lda #$40
+		sta ZP1+1
+				
+	loop:
+		ldy #0
+		lda #$66
+		sta (ZP1),y
+
+		// increment ZP1
+		clc		
+		lda ZP1
+		adc #1
+		sta ZP1
+		bcc !+
+		inc ZP1+1		
+		
+!:		// check for end condition		
+		lda ZP1+1
+		cmp #$41
+		bne loop
+		lda ZP1
+		cmp #$40
 		bne loop
 
 }

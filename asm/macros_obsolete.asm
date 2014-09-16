@@ -58,3 +58,33 @@
 		bne loop
 	
 }
+
+
+// ZP1 even line ptr
+// ZP2 odd line ptr
+// RX needs to be 0
+// Return value is in ACC
+// Affects: ACC,YR
+.macro ConvertPixel2() {
+		
+		lax #0
+		ldy #1
+		
+		// last bit (MSB)		
+		lda (ZP2),y
+		asl
+		
+		ora (ZP2,x)
+		asl
+		
+		// second bit
+		ora (ZP1),y
+		asl
+		
+		// first bit (LSB)
+		ora (ZP1,x)
+
+		tax
+		lda lut,x
+		
+}

@@ -18,3 +18,7 @@ text1:
 .var image1Data = LoadBinary("../data/b00lduck.rle")
 image1: .fill image1Data.getSize(), image1Data.get(i)
 image1_size: .word image1Data.getSize()
+
+.var image2Data = LoadBinary("../data/b00lduck.nar")
+image2: .fill image2Data.getSize(), image2Data.get(i)
+image2_size: .word image2Data.getSize()
