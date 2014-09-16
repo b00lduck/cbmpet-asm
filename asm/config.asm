@@ -11,10 +11,11 @@
 .const ZP5=$e8
 .const ZP6=$ea
 .const ZP7=$ec
-.const ZP8=$ee
+.const ZP8=$ee // PRNG 16
 
 .const ZP10=$f0
 .const ZP11=$f1
 .const ZP12=$f2
-.const ZP13=$f3
+.const ZP13=$f3 // PRNG 8
+
 .const ZP_ISR=$90

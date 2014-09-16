@@ -59,17 +59,25 @@ rp:	.byte $9e, $20
 		cld
 	
 		:ClearScreen()	
-		//:ClearVVRAM()
+		:ClearVVRAM()
 		//:Checkerboard2()
 		//:LoadImage()
 		:LoadImageNA()
 		:SwitchLowercase()
 		
 		:DrawTextZt(2, 18, hello2)
-		:DrawTextZt(6, 20, hello3)
-		
+		:DrawTextZt(6, 20, hello3)	
 			
-		:InstallIsr(isr)		
+		:InstallIsr(isr)				
+		
+		// seed PRNG16
+		//lda #$00
+		//sta ZP8
+		//sta ZP8+1
+		
+		// seed PRNG8
+		lda #$00
+		sta ZP13
 						
 	mainloop:	
 
@@ -78,12 +86,29 @@ rp:	.byte $9e, $20
 		sta $E848	
 		sta $E849	
 
+		lda seconds
+		cmp #$10
+		bcs !+
+		jsr dissolve_in
+		jmp maindraw
+		
+	!:
+		lda seconds
+		cmp #$20
+		bcc maindraw
+		jsr dissolve_out
+	
+	
+	maindraw:
+
+		
+		
 		//:DrawMemoryRandom()
 		//:DrawMemory()
 		:DrawMemoryNA()
 		//DrawOuterBox(framecount)	
 
-		// copy addr to zp1
+		// copy counter to zp1
 		lda $e848
 		sta ZP1
 		lda $e849	
@@ -165,6 +190,80 @@ rp:	.byte $9e, $20
 		inc framecount			
 		jmp (orig_isr)		// jump to original interrupt	
 		
+		
+	dissolve_in:
+		jsr prng8	
+		ldy ZP13		
+		lda $3000,y
+		sta $4000,y				
+		tya
+		ror
+		ror
+		tay
+		lda $3100,y
+		sta $4100,y
+		rts		
+		
+	dissolve_out:
+		jsr prng8	
+		ldy ZP13		
+		lda #$ff
+		sta $4000,y				
+		tya
+		ror
+		ror
+		tay
+		lda #$ff
+		sta $4100,y
+		rts
+		
+		
+	// PRNG 8 subroutine
+	prng8: {
+		lda ZP13
+        beq doEor
+        asl
+        beq noEor
+        bcc noEor
+	doEor:
+		eor #$1d
+	noEor:
+		sta ZP13
+		rts
+	}
+	
+	// PRNG 16 subroutine
+	prng16: {	
+		lda ZP8
+		beq lowZero	 // $0000 and $8000 are special values to test for 
+		asl ZP8
+		lda ZP8+1
+		rol
+		bcc noEor
+ 
+	doEor:
+		eor #>$002d
+		sta ZP8+1
+		lda ZP8
+		eor #<$002d
+		sta ZP8
+		rts
+ 
+	lowZero:
+		lda ZP8+1
+		beq doEor
+		asl
+		beq noEor
+		bcs doEor
+ 
+	noEor:
+		sta ZP8+1
+		rts	
+	}
+	
+	
+	
+	
 	.import source "data.asm"
 
 }	
@@ -184,7 +283,10 @@ lut1:			.byte   $20,$6c,$7b,$62,$7c,$e1,$ff,$fe,$7e,$7f,$61,$fc,$e2,$fb,$ec,$a0
 		
 
 .pc = VVRAM "Virtual Video RAM" virtual
-vvram:
+vvram: .fill 320,0
+
+.pc = VRAM "Video RAM" virtual
+vram: .fill 1000,0
 
 
 

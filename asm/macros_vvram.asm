@@ -329,7 +329,7 @@
 		// Load VVRAM address to ZP1
 		lda #$00
 		sta ZP1
-		lda #$40
+		lda #$30
 		sta ZP1+1
 		
 		// Load src Image address to ZP2
