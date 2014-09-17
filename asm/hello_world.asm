@@ -87,21 +87,42 @@ rp:	.byte $9e, $20
 		sta $E849	
 
 		lda seconds
-		cmp #$10
+		cmp #$20
 		bcs !+
+		jsr dissolve_in
+		jsr dissolve_in
+		jsr dissolve_in
+		jsr dissolve_in
+		jsr dissolve_in
+		jsr dissolve_in
 		jsr dissolve_in
 		jmp maindraw
 		
 	!:
 		lda seconds
-		cmp #$20
+		cmp #$30
 		bcc maindraw
 		jsr dissolve_out
+		jsr dissolve_out
+		jsr dissolve_out
+		jsr dissolve_out
+		jsr dissolve_out
+		jsr dissolve_out
+		jsr dissolve_out
+		jsr dissolve_out
+		jsr dissolve_out
+		jsr dissolve_out
+		jsr dissolve_out
+		jsr dissolve_out
+		jsr dissolve_out
+		jsr dissolve_out
+		jsr dissolve_out
+		jsr dissolve_out
+		jsr dissolve_out
+		jsr dissolve_out		
 	
 	
 	maindraw:
-
-		
 		
 		//:DrawMemoryRandom()
 		//:DrawMemory()
@@ -192,31 +213,57 @@ rp:	.byte $9e, $20
 		
 		
 	dissolve_in:
-		jsr prng8	
-		ldy ZP13		
-		lda $3000,y
-		sta $4000,y				
-		tya
-		ror
-		ror
-		tay
-		lda $3100,y
+		// determine pixel mask to set
+		jsr prng16
+		lda ZP8
+		and #$07
+		tax				
+		lda shift_lut,x		
+				
+		// AND it
+		ldy ZP8+1		
+		and $3000,y
+		ora $4000,y		
+		sta $4000,y
+
+		// mask y with 63 ($3f) to fill the last 64 bytes (whole VVRAM has 320 bytes)
+		cpy #$40
+		bcs !+
+		and $3100,y	
+		ora $4100,y
 		sta $4100,y
-		rts		
-		
-	dissolve_out:
-		jsr prng8	
-		ldy ZP13		
-		lda #$ff
-		sta $4000,y				
-		tya
-		ror
-		ror
-		tay
-		lda #$ff
-		sta $4100,y
+	!:
 		rts
 		
+	dissolve_out:
+
+		// determine pixel mask to set
+		jsr prng16
+		lda ZP8
+		and #$07
+		tax				
+		lda shift_lut,x		
+				
+		// OR it with the VVRAM contents at index y
+		ldy ZP8+1		
+		ora $4000,y	
+		sta $4000,y
+
+		// mask y with 63 ($3f) to fill the last 64 bytes (whole VVRAM has 320 bytes)
+		cpy #$40
+		bcs !+
+		ora $4100,y	
+		sta $4100,y
+	!:
+		rts
+		
+	
+	// AC $01 -> AC $01
+	// AC $01 -> AC $01
+	getBit: {
+		rts
+	}
+	
 		
 	// PRNG 8 subroutine
 	prng8: {
@@ -280,6 +327,7 @@ orig_isr: 		.dword 	0
 
 lut:			.byte 	$20,$7e,$7c,98+128,123,97,127+128,108+128,108,127,97+128,123+128,98,124+128,126+128,160
 lut1:			.byte   $20,$6c,$7b,$62,$7c,$e1,$ff,$fe,$7e,$7f,$61,$fc,$e2,$fb,$ec,$a0
+shift_lut:		.byte	$01,$02,$04,$08,$10,$20,$40,$80,$FF
 		
 
 .pc = VVRAM "Virtual Video RAM" virtual
