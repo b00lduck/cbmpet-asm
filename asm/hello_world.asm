@@ -87,39 +87,22 @@ rp:	.byte $9e, $20
 		sta $E849	
 
 		lda seconds
-		cmp #$20
+		cmp #$2
 		bcs !+
-		jsr dissolve_in
-		jsr dissolve_in
-		jsr dissolve_in
-		jsr dissolve_in
-		jsr dissolve_in
-		jsr dissolve_in
-		jsr dissolve_in
+		.for(var i=0;i<10;i++) {
+			jsr dissolve_in
+		}
+		
 		jmp maindraw
 		
 	!:
 		lda seconds
-		cmp #$30
+		cmp #$5
 		bcc maindraw
-		jsr dissolve_out
-		jsr dissolve_out
-		jsr dissolve_out
-		jsr dissolve_out
-		jsr dissolve_out
-		jsr dissolve_out
-		jsr dissolve_out
-		jsr dissolve_out
-		jsr dissolve_out
-		jsr dissolve_out
-		jsr dissolve_out
-		jsr dissolve_out
-		jsr dissolve_out
-		jsr dissolve_out
-		jsr dissolve_out
-		jsr dissolve_out
-		jsr dissolve_out
-		jsr dissolve_out		
+		.for(var i=0;i<8;i++) {
+			jsr dissolve_out
+		}
+	
 	
 	
 	maindraw:
@@ -214,56 +197,57 @@ rp:	.byte $9e, $20
 		
 	dissolve_in:
 		// determine pixel mask to set
-		jsr prng16
-		lda ZP8
+		jsr prng8
+		lda ZP13
 		and #$07
 		tax				
-		lda shift_lut,x		
+		lda shift_lut,x
+		pha
+		
+		lda ZP13
+		lsr
+		lsr
+		lsr		
+		tay
+		pla
 				
-		// AND it
-		ldy ZP8+1		
-		and $3000,y
-		ora $4000,y		
-		sta $4000,y
+		// AND it		
+		.for(var a=$0;a<$140;a+=$20) {		
+			pha
+			and $3000+a,y
+			ora $4000+a,y		
+			sta $4000+a,y
+			pla
+		}		
 
-		// mask y with 63 ($3f) to fill the last 64 bytes (whole VVRAM has 320 bytes)
-		cpy #$40
-		bcs !+
-		and $3100,y	
-		ora $4100,y
-		sta $4100,y
-	!:
 		rts
 		
 	dissolve_out:
 
 		// determine pixel mask to set
-		jsr prng16
-		lda ZP8
+		jsr prng8
+		lda ZP13
 		and #$07
 		tax				
-		lda shift_lut,x		
-				
-		// OR it with the VVRAM contents at index y
-		ldy ZP8+1		
-		ora $4000,y	
-		sta $4000,y
-
-		// mask y with 63 ($3f) to fill the last 64 bytes (whole VVRAM has 320 bytes)
-		cpy #$40
-		bcs !+
-		ora $4100,y	
-		sta $4100,y
-	!:
-		rts
+		lda shift_lut,x
+		pha
 		
-	
-	// AC $01 -> AC $01
-	// AC $01 -> AC $01
-	getBit: {
+		lda ZP13
+		lsr
+		lsr
+		lsr		
+		tay
+		pla
+				
+		// AND it		
+		.for(var a=$0;a<$140;a+=$20) {		
+			pha
+			ora $4000+a,y		
+			sta $4000+a,y
+			pla
+		}		
+
 		rts
-	}
-	
 		
 	// PRNG 8 subroutine
 	prng8: {
