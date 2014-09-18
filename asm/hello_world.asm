@@ -17,17 +17,19 @@
 
 .pc = BASIC "Basic upstart" {
 
-!:	.word !+
-	.byte 1, $00
+	.word !+
+	.byte 1, 0
 rp:	.byte $9e, $20
 	.byte $31, $33, $33, $37
 	.text ":"
 	.byte $9b,0
+	
 !:	.word !+
 	.byte 2, $00
 	.byte $8f, $20
 	.text "PET-A-BYTE"
 	.byte 0
+	
 !:	.word !+
 	.byte 3, $00
 	.byte $8f, $20
@@ -71,40 +73,86 @@ rp:	.byte $9e, $20
 		:InstallIsr(isr)				
 		
 		// seed PRNG16
-		//lda #$00
-		//sta ZP8
-		//sta ZP8+1
+		lda #$00
+		sta ZP8
+		sta ZP8+1
 		
 		// seed PRNG8
-		lda #$00
+		lda #$00		
 		sta ZP13
+		
+		lda #$ff
+		sta ZP8
 						
 	mainloop:	
 
-		// ??
+		// ?? (something with interrupt)
 		lda #$00		
 		sta $E848	
 		sta $E849	
 
-		lda seconds
-		cmp #$2
-		bcs !+
-		.for(var i=0;i<10;i++) {
-			jsr dissolve_in
-		}
 		
+		// 00:00.00 start first phase
+		lda frames
+		bne !+
+		lda seconds
+		bne !+
+		lda minutes
+		bne !+
+		lda #$21
+		sta phase_counter	
+		lda #$00
+		sta active_phase
+		jmp phase_switch
+				
+		// 00:02.00 start phase 2
+	!:	lda frames
+		bne !+
+		lda seconds
+		cmp #$10
+		bne !+
+		lda minutes
+		bne !+
+		lda #$21
+		sta phase_counter	
+		lda #$01
+		sta active_phase
+		jmp phase_switch
+
+	!:	
+	
+	phase_switch:
+		lda active_phase
+		beq phase0
+		dec active_phase
+		beq phase1
 		jmp maindraw
 		
-	!:
-		lda seconds
-		cmp #$5
-		bcc maindraw
-		.for(var i=0;i<8;i++) {
-			jsr dissolve_out
-		}
+		
+		
+	phase0:
+		dec phase_counter
+		beq maindraw
+		
+		jsr dissolve_in
+		jsr dissolve_in
+		jsr dissolve_in
+		jsr dissolve_in
 	
+		jmp maindraw
 	
-	
+	phase1:
+		dec phase_counter
+		beq maindraw
+		
+		//jsr invert
+
+		jmp maindraw
+				
+				
+				
+					
+				
 	maindraw:
 		
 		//:DrawMemoryRandom()
@@ -249,6 +297,35 @@ rp:	.byte $9e, $20
 
 		rts
 		
+		
+		
+	invert:
+
+		// determine pixel mask to set
+		jsr prng8
+		lda ZP13
+		and #$07
+		tax				
+		lda shift_lut,x
+		pha
+		
+		lda ZP13
+		lsr
+		lsr
+		lsr		
+		tay
+		pla
+				
+		// AND it		
+		.for(var a=$0;a<$140;a+=$20) {		
+			pha
+			eor $4000+a,y	
+			sta $4000+a,y
+			pla
+		}		
+
+		rts		
+		
 	// PRNG 8 subroutine
 	prng8: {
 		lda ZP13
@@ -297,7 +374,11 @@ rp:	.byte $9e, $20
 	
 	.import source "data.asm"
 
-}	
+}
+
+active_phase:	.byte 0
+phase_counter:	.byte 0
+
 
 perfcount: 		.byte 	0
 
