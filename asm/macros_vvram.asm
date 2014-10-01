@@ -558,58 +558,75 @@
 
 }
 
+// Current VVRAM target address (left upper corner of char) in ZP1
+// Font address in ZP2
+// Char to draw in AC
+.macro DrawBitmapChar() {
+
+    // even target and even source
+	// "straight" case
+	// one source byte are two PETSCII chars, which are 4x2 VVRAM pixels
+	// source:      target:
+	// 1 2  5 6     1 2  5 6 
+	// 3 4  7 8     3 4  7 8
+	/*
+	ldy #0
+	lda (ZP2),y
+	sta (ZP1),y
+	ldy #20
+	lda (ZP2),y
+	sta (ZP1),y
+	ldy #40
+	lda (ZP2),y
+	sta (ZP1),y
+	*/
+	
+    // odd target and even source
+	// one source byte are three PETSCII chars. The "x" bits must not be touched.
+	//
+	// source:      target:
+	// 1 2  5 6     x 1  2 5  6 x 
+	// 3 4  7 8     x 3  4 7  8 x
+	//
+	// a translation table is used to translate the source to the target bits by following table:
+	//
+	// first target byte				second target byte
+	// src bit      target bit          src bit      target bit
+	// x			1			        6            1
+	// 1			2			        x            2
+	// x			3					8            3
+	// 3			4					x			 4
+	// 2			5					x			 5
+	// 5			6					x			 6
+	// 4			7 					x			 7
+	// 7			8					x			 8
+	//
+	ldy #0
+	lda (ZP2),y
+	sta (ZP1),y
+	ldy #20
+	lda (ZP2),y
+	sta (ZP1),y
+	ldy #40
+	lda (ZP2),y
+	sta (ZP1),y				
+
+}
 
 .macro DrawBitmapText() {
 
-	init:
-		// Load VVRAM address to ZP1
-		lda #$00
-		sta ZP1
-		lda #$40
-		sta ZP1+1
-		
-		// Load src Image address to ZP2
-		lda #<font1
-		sta ZP2
-		lda #>font1
-		sta ZP2+1
-		
-		// Load Image end address to ZP3
-		lda #<font1+320
-		sta ZP3
-		lda #>font1+320
-		sta ZP3+1	
-		
-	loop:
+	// Load target VVRAM address to ZP1
+	lda #$00
+	sta ZP1
+	lda #$40
+	sta ZP1+1
 	
-		ldy #0
-		lda (ZP2),y
-		sta (ZP1),y
-		
+	// Load src font address to ZP2
+	lda #<font1
+	sta ZP2
+	lda #>font1
+	sta ZP2+1
 	
-		clc
-		lda #1
-		adc ZP1
-		sta ZP1
-		bcc !+
-		inc ZP1+1			
-		
-	!: 
-		clc
-		lda #1
-		adc ZP2
-		sta ZP2
-		bcc !+
-		inc ZP2+1
-	!:
-
-		lda ZP3
-		cmp ZP2		
-		bne loop
-		
-		lda ZP3+1
-		cmp ZP2+1
-		
-		bne loop
-
+	:DrawBitmapChar()
+				
 }

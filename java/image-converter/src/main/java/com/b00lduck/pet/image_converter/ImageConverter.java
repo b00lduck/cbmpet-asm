@@ -22,11 +22,27 @@ public class ImageConverter {
 	public static void main(String[] args) throws IOException {
 
 		ImageConverter imageConverter = new ImageConverter();
-	    
-		imageConverter.convert("D:\\PET\\data\\b00lduck.raw", "D:\\PET\\data\\b00lduck.rle");
-		imageConverter.convertNa("D:\\PET\\data\\b00lduck.raw", "D:\\PET\\data\\b00lduck.nar");
 		
-		imageConverter.convertNa("D:\\PET\\data\\font.raw", "D:\\PET\\data\\font1.nar");
+		imageConverter.bittable();
+		
+		//imageConverter.convert("D:\\PET\\data\\b00lduck.raw", "D:\\PET\\data\\b00lduck.rle");
+		//imageConverter.convertNa("D:\\PET\\data\\b00lduck.raw", "D:\\PET\\data\\b00lduck.nar");
+		
+		//imageConverter.convertNa("D:\\PET\\data\\font.raw", "D:\\PET\\data\\font1.nar");
+		
+	}
+	
+	public void bittable() {
+		
+		for(Integer i=0;i<256;i++) {
+			
+			
+			String s = String.format("0b%8s", Integer.toBinaryString(i).toUpperCase()).replace(' ', '0');
+			
+			System.out.println(s);
+			
+			
+		}
 		
 	}
 	
