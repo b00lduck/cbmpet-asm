@@ -92,6 +92,12 @@ rp:	.byte $9e, $20
 		sta $E849	
 
 		
+		:DrawBitmapText()
+		
+		jmp maindraw
+		
+		
+		
 		// 00:00.00 start first phase
 		lda frames
 		bne !+
@@ -127,9 +133,7 @@ rp:	.byte $9e, $20
 		dec active_phase
 		beq phase1
 		jmp maindraw
-		
-		
-		
+					
 	phase0:
 		dec phase_counter
 		beq maindraw

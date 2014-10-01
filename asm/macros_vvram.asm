@@ -557,3 +557,59 @@
 		bne loop
 
 }
+
+
+.macro DrawBitmapText() {
+
+	init:
+		// Load VVRAM address to ZP1
+		lda #$00
+		sta ZP1
+		lda #$40
+		sta ZP1+1
+		
+		// Load src Image address to ZP2
+		lda #<font1
+		sta ZP2
+		lda #>font1
+		sta ZP2+1
+		
+		// Load Image end address to ZP3
+		lda #<font1+320
+		sta ZP3
+		lda #>font1+320
+		sta ZP3+1	
+		
+	loop:
+	
+		ldy #0
+		lda (ZP2),y
+		sta (ZP1),y
+		
+	
+		clc
+		lda #1
+		adc ZP1
+		sta ZP1
+		bcc !+
+		inc ZP1+1			
+		
+	!: 
+		clc
+		lda #1
+		adc ZP2
+		sta ZP2
+		bcc !+
+		inc ZP2+1
+	!:
+
+		lda ZP3
+		cmp ZP2		
+		bne loop
+		
+		lda ZP3+1
+		cmp ZP2+1
+		
+		bne loop
+
+}

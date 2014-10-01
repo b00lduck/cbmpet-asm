@@ -22,3 +22,7 @@ image1_size: .word image1Data.getSize()
 .var image2Data = LoadBinary("../data/b00lduck.nar")
 image2: .fill image2Data.getSize(), image2Data.get(i)
 image2_size: .word image2Data.getSize()
+
+.var font1Data = LoadBinary("../data/font1.nar")
+font1: .fill font1Data.getSize(), font1Data.get(i)
+font1_size: .word font1Data.getSize()
