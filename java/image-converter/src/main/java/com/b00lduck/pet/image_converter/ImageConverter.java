@@ -33,14 +33,38 @@ public class ImageConverter {
 	}
 	
 	public void bittable() {
+
+		//int mapping1[] = { 0, 1, 0, 3, 2, 5, 4, 7 }; // Even source, odd target: target byte 1 
+		//int mapping1[] = { 6, 0, 8, 0, 0, 0, 0, 0 }; // Even source, odd target: target byte 2
+		
+		//int mapping1[] = { 2, 5, 4, 7, 6, 0, 8, 0 }; // Odd source, even target: source byte 1
+		int mapping1[] = { 0, 0, 0, 0, 0, 1, 0, 3 }; // Odd source, even target: source byte 2
+		
 		
 		for(Integer i=0;i<256;i++) {
 			
+			String s = String.format("%8s", Integer.toBinaryString(i).toUpperCase()).replace(' ', '0');
 			
-			String s = String.format("0b%8s", Integer.toBinaryString(i).toUpperCase()).replace(' ', '0');
+			Integer out = 0;
 			
-			System.out.println(s);
+			for(int x=0;x<8;x++) {
+							
+				int srcvalue = s.charAt(x) == '1' ? 1 : 0;
+				
+				int map  = mapping1[7 - x];
+				
+				if (map > 0) {
+					out += srcvalue << (map - 1);	
+				}
+				
+			}
+
+			String outstring = String.format("%8s", Integer.toBinaryString(out).toUpperCase()).replace(' ', '0');
 			
+			// System.out.println(s + " " + outstring);
+			
+			String outstring1 = String.format("$%2s", Integer.toHexString(out).toUpperCase()).replace(' ', '0');
+			System.out.print(outstring1 + ",");
 			
 		}
 		
