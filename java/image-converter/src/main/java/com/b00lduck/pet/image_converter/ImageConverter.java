@@ -38,7 +38,43 @@ public class ImageConverter {
 		//int mapping1[] = { 6, 0, 8, 0, 0, 0, 0, 0 }; // Even source, odd target: target byte 2
 		
 		//int mapping1[] = { 2, 5, 4, 7, 6, 0, 8, 0 }; // Odd source, even target: source byte 1
-		int mapping1[] = { 0, 0, 0, 0, 0, 1, 0, 3 }; // Odd source, even target: source byte 2
+		//int mapping1[] = { 0, 0, 0, 0, 0, 1, 0, 3 }; // Odd source, even target: source byte 2
+		
+		//int mapping1[] = { 5, 6, 7, 8, 0, 0, 0, 0 }; // source ofs 2, even target: source byte 1
+		//int mapping1[] = { 0, 0, 0, 0, 1, 2, 3, 4 }; // source ofs 2, even target: source byte 2
+		
+		//int mapping1[] = { 6, 0, 8, 0, 0, 0, 0, 0 }; // source ofs 3, even target: source byte 1
+		//int mapping1[] = { 0, 1, 0, 3, 2, 5, 4, 7 }; // source ofs 3, even target: source byte 2		
+
+		//int mapping1[] = { 0, 0, 0, 0, 2, 5, 4, 7 }; // source ofs 1, target ofs 2: source byte 1
+		//int mapping1[] = { 6, 1, 8, 3, 0, 0, 0, 0 }; // source ofs 1, target ofs 2: source byte 2
+		
+		//int mapping1[] = { 0, 0, 0, 0, 0, 0, 2, 4 }; // source ofs 1, target ofs 3: target byte 1, src byte 1
+		//int mapping1[] = { 5, 6, 7, 8, 0, 0, 0, 0 }; // source ofs 1, target ofs 3: target byte 2, src byte 1
+		//int mapping1[] = { 0, 0, 0, 0, 1, 0, 3, 0 }; // source ofs 1, target ofs 3: target byte 2, src byte 2
+		
+		//int mapping1[] = { 0, 5, 0, 7, 6, 0, 8, 0 }; // source ofs 2, target ofs 1: target byte 1, src byte 1
+		//int mapping1[] = { 0, 0, 0, 0, 0, 1, 0, 3 }; // source ofs 2, target ofs 1: target byte 1, src byte 2
+		//int mapping1[] = { 6, 0, 8, 0, 0, 0, 0, 0 }; // source ofs 2, target ofs 1: target byte 2, src byte 2
+		
+		//int mapping1[] = { 0, 6, 0, 8, 0, 0, 0, 0 }; // source ofs 3, target ofs 1: target byte 1, src byte 1
+		//int mapping1[] = { 0, 0, 0, 0, 1, 2, 3, 4 }; // source ofs 3, target ofs 1: target byte 1, src byte 2
+		//int mapping1[] = { 5, 0, 7, 0, 0, 0, 0, 0 }; // source ofs 3, target ofs 1: target byte 2, src byte 2
+		
+		//int mapping1[] = { 0, 0, 0, 0, 1, 2, 3, 4 }; // source ofs 0, target ofs 2: source byte 1
+		//int mapping1[] = { 5, 6, 7, 8, 0, 0, 0, 0 }; // source ofs 0, target ofs 2: source byte 2		
+		
+		//int mapping1[] = { 0, 0, 0, 0, 6, 0, 8, 0 }; // source ofs 3, target ofs 2: target byte 1, src byte 1
+		//int mapping1[] = { 0, 0, 0, 0, 0, 1, 0, 3 }; // source ofs 3, target ofs 2: target byte 1, src byte 2
+		//int mapping1[] = { 2, 5, 4, 7, 0, 0, 0, 0 }; // source ofs 3, target ofs 2: target byte 2, src byte 2		
+
+		//int mapping1[] = { 0, 0, 0, 0, 0, 5, 0, 7 }; // source ofs 2, target ofs 3: target byte 1, src byte 1
+		//int mapping1[] = { 6, 0, 8, 0, 0, 0, 0, 0 }; // source ofs 2, target ofs 3: target byte 2, src byte 1
+		//int mapping1[] = { 0, 1, 0, 3, 2, 0, 4, 0 }; // source ofs 2, target ofs 3: target byte 2, src byte 2
+
+		//int mapping1[] = { 0, 0, 0, 0, 0, 1, 0, 3 }; // source ofs 0, target ofs 3: byte 1
+		int mapping1[] = { 2, 5, 4, 7, 6, 0, 8, 0 }; // source ofs 0, target ofs 3: byte 2		
+		
 		
 		
 		for(Integer i=0;i<256;i++) {
