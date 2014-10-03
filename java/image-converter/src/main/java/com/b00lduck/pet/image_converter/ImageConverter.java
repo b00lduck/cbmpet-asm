@@ -27,12 +27,12 @@ public class ImageConverter {
 
 		ImageConverter imageConverter = new ImageConverter();
 		
-		System.out.print(imageConverter.bittable());
+		//System.out.print(imageConverter.bittable());
 		
 		//imageConverter.convert("D:\\PET\\data\\b00lduck.raw", "D:\\PET\\data\\b00lduck.rle");
 		//imageConverter.convertNa("D:\\PET\\data\\b00lduck.raw", "D:\\PET\\data\\b00lduck.nar");
 		
-		//imageConverter.convertNa("D:\\PET\\data\\font.raw", "D:\\PET\\data\\font1.nar");
+		imageConverter.convertNa("D:\\PET\\data\\font.raw", "D:\\PET\\data\\font1.nar");
 		
 	}
 	

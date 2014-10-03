@@ -110,7 +110,7 @@
    x 4  7 8  B x	x 4  7 8  B x
 */
 .macro DrawBitmapChar_Source1_Target1() {
-	:BitTranslator_Masking(%01011111,%10100000)
+	:BitTranslator_Masking(%01011111)
 }
 
 /* Offsets: Source 1, Target 2 
@@ -208,7 +208,7 @@
 // x x  7 8  3 4   x x  7 8  3 4
 */
 .macro DrawBitmapChar_Source2_Target2() {
-	:BitTranslator_Masking(%00001111, %11110000)
+	:BitTranslator_Masking(%00001111)
 }
 
 // source:         target:
@@ -301,13 +301,14 @@
 // x x  x 6  | A B  E x     x x  x 6  | A B  E x 
 // x x  x 8  | C D  G x     x x  x 8  | C D  G x
 .macro DrawBitmapChar_Source3_Target3() {
-	:BitTranslator_Masking(%00000101, %11111010)			
+	:BitTranslator_Masking(%00000101)			
 }
 
 
 // determine x pixel offset of the desired character in the source bitmap
-// choose one of the DrawBitmapChar macros depending on the modulo of the offset
-// deliver char id in accumulator!
+// determine y pixel offser of the desired character in the source bitmap
+// choose one of the DrawBitmapChar macros depending on the modulo of the y offset
+// IN: char id in AC
 .macro DrawBitmapChar() {
 		
 		sta ZP10	// save char id in ZP10
@@ -373,122 +374,83 @@
 	sta VVRAM + $50
 	sta VVRAM + $51
 	sta VVRAM + $52
-	
-	
-
 					
 }
 
 
 
-
 // Take 1st src byte, translate it via given lookup table, and write the result to the 1st target byte
-.macro BitTranslator_1st_src_1st_target(LUT_TABLE) {
-	
-	ldy #0
-	lda (ZP2),y				// load original font byte
-	tax						// copy it to x
-	lda LUT_TABLE,x			// lookup shifted font byte	
-	ora (ZP1),y				// add
-	sta (ZP1),y				// store to vram
-	
-	ldy #20	
-	lda (ZP2),y				// load original font byte
-	tax						// copy it to x
-	lda LUT_TABLE,x			// lookup shifted font byte	
-	ora (ZP1),y				// add
-	sta (ZP1),y				// store to vram	
-	
-	ldy #40
-	lda (ZP2),y				// load original font byte
-	tax						// copy it to x
-	lda LUT_TABLE,x			// lookup shifted font byte	
-	ora (ZP1),y				// add
-	sta (ZP1),y				// store to vram	
+.macro BitTranslator_1st_src_1st_target(LUT_TABLE) {	
+	:BitTranslator_Case1(0,LUT_TABLE)
 }
 
 // Take 1st src byte, translate it via given lookup table, and write the result to the 2nd target byte
-.macro BitTranslator_1st_src_2nd_target(LUT_TABLE) {
-	
-	ldy #0
-	lda (ZP2),y				// load original font byte
-	tax						// copy it to x
-	lda LUT_TABLE,x			// lookup shifted font byte	
-	ldy #1
-	ora (ZP1),y				// store to vram
-	sta (ZP1),y				// store to vram
-	
-	ldy #20	
-	lda (ZP2),y				// load original font byte
-	tax						// copy it to x
-	lda LUT_TABLE,x			// lookup shifted font byte	
-	ldy #21	
-	ora (ZP1),y				// store to vram
-	sta (ZP1),y				// store to vram	
-	
-	ldy #40
-	lda (ZP2),y				// load original font byte
-	tax						// copy it to x
-	lda LUT_TABLE,x			// lookup shifted font byte	
-	ldy #41	
-	ora (ZP1),y				// store to vram
-	sta (ZP1),y				// store to vram	
+.macro BitTranslator_1st_src_2nd_target(LUT_TABLE) {	
+	:BitTranslator_Case2(0,1,LUT_TABLE)
 }
 
 // Take 2nd src byte, translate it via given lookup table, and write the result to the 1st target byte
 .macro BitTranslator_2nd_src_1st_target(LUT_TABLE) {
-	
-	ldy #1
-	lda (ZP2),y				// load original font byte
-	tax						// copy it to x
-	lda LUT_TABLE,x			// lookup shifted font byte	
-	ldy #0
-	ora (ZP1),y				// store to vram
-	sta (ZP1),y				// store to vram
-	
-	ldy #21	
-	lda (ZP2),y				// load original font byte
-	tax						// copy it to x
-	lda LUT_TABLE,x			// lookup shifted font byte	
-	ldy #20	
-	ora (ZP1),y				// store to vram
-	sta (ZP1),y				// store to vram	
-	
-	ldy #41
-	lda (ZP2),y				// load original font byte
-	tax						// copy it to x
-	lda LUT_TABLE,x			// lookup shifted font byte	
-	ldy #40	
-	ora (ZP1),y				// store to vram
-	sta (ZP1),y				// store to vram	
+	:BitTranslator_Case2(1,0,LUT_TABLE)
 }
 
 // Take 2nd src byte, translate it via given lookup table, and write the result to the 2nd target byte
 .macro BitTranslator_2nd_src_2nd_target(LUT_TABLE) {
-	
-	ldy #1
+	:BitTranslator_Case1(1,LUT_TABLE)
+}
+
+.macro BitTranslator_Case1(DELTA, LUT_TABLE) {
+	ldy #DELTA
 	lda (ZP2),y				// load original font byte
 	tax						// copy it to x
 	lda LUT_TABLE,x			// lookup shifted font byte	
+	ora (ZP1),y				// add
+	sta (ZP1),y				// store to vram
+	
+	ldy #DELTA+20	
+	lda (ZP2),y				// load original font byte
+	tax						// copy it to x
+	lda LUT_TABLE,x			// lookup shifted font byte	
+	ora (ZP1),y				// add
+	sta (ZP1),y				// store to vram	
+	
+	ldy #DELTA+40
+	lda (ZP2),y				// load original font byte
+	tax						// copy it to x
+	lda LUT_TABLE,x			// lookup shifted font byte	
+	ora (ZP1),y				// add
+	sta (ZP1),y				// store to vram	
+}
+
+.macro BitTranslator_Case2(DELTA1, DELTA2, LUT_TABLE) {	
+	ldy #DELTA1
+	lda (ZP2),y				// load original font byte
+	tax						// copy it to x
+	lda LUT_TABLE,x			// lookup shifted font byte	
+	ldy #DELTA2
 	ora (ZP1),y				// store to vram
 	sta (ZP1),y				// store to vram
 	
-	ldy #21
+	ldy #DELTA1+20	
 	lda (ZP2),y				// load original font byte
 	tax						// copy it to x
 	lda LUT_TABLE,x			// lookup shifted font byte	
+	ldy #DELTA2+20	
 	ora (ZP1),y				// store to vram
 	sta (ZP1),y				// store to vram	
 	
-	ldy #41
+	ldy #DELTA1+40
 	lda (ZP2),y				// load original font byte
 	tax						// copy it to x
 	lda LUT_TABLE,x			// lookup shifted font byte	
+	ldy #DELTA2+40	
 	ora (ZP1),y				// store to vram
 	sta (ZP1),y				// store to vram	
 }
 
-.macro BitTranslator_Masking(MASK_A, MASK_B) {
+.macro BitTranslator_Masking(MASK_A) {
+
+	.var MASK_I = 255-MASK_A
 
 	// 1st Byte
 	ldy #0
@@ -512,19 +474,19 @@
 	// 2nd Byte
 	ldy #1
 	lda (ZP2),y				// load original font byte
-	and #MASK_B
+	and #MASK_I
 	ora (ZP1),y				// store to vram
 	sta (ZP1),y				// store to vram
 	
 	ldy #21	
 	lda (ZP2),y				// load original font byte
-	and #MASK_B
+	and #MASK_I
 	ora (ZP1),y				// store to vram
 	sta (ZP1),y				// store to vram	
 	
 	ldy #41
 	lda (ZP2),y				// load original font byte
-	and #MASK_B
+	and #MASK_I
 	ora (ZP1),y				// store to vram
 	sta (ZP1),y				// store to vram	
 		
