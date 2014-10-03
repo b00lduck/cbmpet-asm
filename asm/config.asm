@@ -1,8 +1,10 @@
 .const BASIC=$0401
 .const MAIN=$0539 // 1337
 .const VRAM=$8000
-.const VVRAM=$4000
-.const VVRAM_SIZE=$3E80
+.const VVRAM=$7e00
+.const VVRAM_SIZE=$013f
+.const VVRAM_END=VVRAM+VVRAM_SIZE
+.const TABLES=$6000
 
 .const ZP1=$e0
 .const ZP2=$e2

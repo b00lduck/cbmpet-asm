@@ -2,13 +2,13 @@
 
 	// Pointer to the VVRAM line (ZP1)
 
-	// ZP1 = $4000
+	// ZP1 = VVRAM
 	// ZP3 = $80A0
 	
-	lda #$40
-	sta ZP1+1
-	lda #$00
+	lda #<VVRAM
 	sta ZP1
+	lda #>VVRAM
+	sta ZP1+1
 			
 	lda #$80
 	sta ZP3+1	
@@ -85,7 +85,7 @@
 
 
 
-.macro DrawMemory() {
+.macro DrawMemory() { //DEPRECATED
 
 	// Pointer to the even line VVRAM (ZP1) and odd line VVRAM (ZP2)
 
@@ -119,7 +119,7 @@
 }
 
 // Draw 1 lines of real screen memory (40 chars)
-.macro DrawVVramLineV2() {
+.macro DrawVVramLineV2() {//DEPRECATED
 	
 		// set in-line offset counter to 0
 		lda #$00
@@ -192,7 +192,7 @@
 // RX needs to be 0
 // Return value is in ACC
 // Affects: ACC,YR
-.macro ConvertPixel() {
+.macro ConvertPixel() {//DEPRECATED
 
 			ldy #1	
 		
@@ -287,9 +287,9 @@
 .macro ClearVVRAM() {
 
 		// Load VVRAM address to ZP1
-		lda #$00
+		lda #<VVRAM
 		sta ZP1
-		lda #$40
+		lda #>VVRAM
 		sta ZP1+1
 				
 		ldx #0 // counter
@@ -315,10 +315,10 @@
 	endcheck:
 		// check if end is reached ($7e80)
 		lda ZP1+1
-		cmp #$7e 
+		cmp #>VVRAM_END+1
 		bne loop
 		lda ZP1
-		cmp #$80
+		cmp #<VVRAM_END+1
 		bne loop
 
 }
@@ -468,9 +468,9 @@
 		clc
 		
 		// Load VVRAM address to ZP1
-		lda #$00
+		lda #<VVRAM
 		sta ZP1
-		lda #$40
+		lda #>VVRAM
 		sta ZP1+1
 		
 		ldy #0 // always zero

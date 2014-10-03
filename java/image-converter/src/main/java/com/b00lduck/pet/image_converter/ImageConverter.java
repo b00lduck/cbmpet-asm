@@ -6,7 +6,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * Image Converter
@@ -23,7 +27,7 @@ public class ImageConverter {
 
 		ImageConverter imageConverter = new ImageConverter();
 		
-		imageConverter.bittable();
+		System.out.print(imageConverter.bittable());
 		
 		//imageConverter.convert("D:\\PET\\data\\b00lduck.raw", "D:\\PET\\data\\b00lduck.rle");
 		//imageConverter.convertNa("D:\\PET\\data\\b00lduck.raw", "D:\\PET\\data\\b00lduck.nar");
@@ -32,77 +36,105 @@ public class ImageConverter {
 		
 	}
 	
-	public void bittable() {
+	private static final SortedMap<String, int[]> mapMap = new TreeMap<>();
+	
+	static {
+		
+		mapMap.put("pixel_move_lut_s0_t1_a", new int[] { 0, 1, 0, 3, 2, 5, 4, 7 });
+		mapMap.put("pixel_move_lut_s0_t1_b", new int[] { 6, 0, 8, 0, 0, 0, 0, 0 });
+		
+		mapMap.put("pixel_move_lut_s0_t2_a", new int[] { 0, 0, 0, 0, 1, 2, 3, 4 });
+		mapMap.put("pixel_move_lut_s0_t2_b", new int[] { 5, 6, 7, 8, 0, 0, 0, 0 });		
 
-		//int mapping1[] = { 0, 1, 0, 3, 2, 5, 4, 7 }; // Even source, odd target: target byte 1 
-		//int mapping1[] = { 6, 0, 8, 0, 0, 0, 0, 0 }; // Even source, odd target: target byte 2
-		
-		//int mapping1[] = { 2, 5, 4, 7, 6, 0, 8, 0 }; // Odd source, even target: source byte 1
-		//int mapping1[] = { 0, 0, 0, 0, 0, 1, 0, 3 }; // Odd source, even target: source byte 2
-		
-		//int mapping1[] = { 5, 6, 7, 8, 0, 0, 0, 0 }; // source ofs 2, even target: source byte 1
-		//int mapping1[] = { 0, 0, 0, 0, 1, 2, 3, 4 }; // source ofs 2, even target: source byte 2
-		
-		//int mapping1[] = { 6, 0, 8, 0, 0, 0, 0, 0 }; // source ofs 3, even target: source byte 1
-		//int mapping1[] = { 0, 1, 0, 3, 2, 5, 4, 7 }; // source ofs 3, even target: source byte 2		
-
-		//int mapping1[] = { 0, 0, 0, 0, 2, 5, 4, 7 }; // source ofs 1, target ofs 2: source byte 1
-		//int mapping1[] = { 6, 1, 8, 3, 0, 0, 0, 0 }; // source ofs 1, target ofs 2: source byte 2
-		
-		//int mapping1[] = { 0, 0, 0, 0, 0, 0, 2, 4 }; // source ofs 1, target ofs 3: target byte 1, src byte 1
-		//int mapping1[] = { 5, 6, 7, 8, 0, 0, 0, 0 }; // source ofs 1, target ofs 3: target byte 2, src byte 1
-		//int mapping1[] = { 0, 0, 0, 0, 1, 0, 3, 0 }; // source ofs 1, target ofs 3: target byte 2, src byte 2
-		
-		//int mapping1[] = { 0, 5, 0, 7, 6, 0, 8, 0 }; // source ofs 2, target ofs 1: target byte 1, src byte 1
-		//int mapping1[] = { 0, 0, 0, 0, 0, 1, 0, 3 }; // source ofs 2, target ofs 1: target byte 1, src byte 2
-		//int mapping1[] = { 6, 0, 8, 0, 0, 0, 0, 0 }; // source ofs 2, target ofs 1: target byte 2, src byte 2
-		
-		//int mapping1[] = { 0, 6, 0, 8, 0, 0, 0, 0 }; // source ofs 3, target ofs 1: target byte 1, src byte 1
-		//int mapping1[] = { 0, 0, 0, 0, 1, 2, 3, 4 }; // source ofs 3, target ofs 1: target byte 1, src byte 2
-		//int mapping1[] = { 5, 0, 7, 0, 0, 0, 0, 0 }; // source ofs 3, target ofs 1: target byte 2, src byte 2
-		
-		//int mapping1[] = { 0, 0, 0, 0, 1, 2, 3, 4 }; // source ofs 0, target ofs 2: source byte 1
-		//int mapping1[] = { 5, 6, 7, 8, 0, 0, 0, 0 }; // source ofs 0, target ofs 2: source byte 2		
-		
-		//int mapping1[] = { 0, 0, 0, 0, 6, 0, 8, 0 }; // source ofs 3, target ofs 2: target byte 1, src byte 1
-		//int mapping1[] = { 0, 0, 0, 0, 0, 1, 0, 3 }; // source ofs 3, target ofs 2: target byte 1, src byte 2
-		//int mapping1[] = { 2, 5, 4, 7, 0, 0, 0, 0 }; // source ofs 3, target ofs 2: target byte 2, src byte 2		
-
-		//int mapping1[] = { 0, 0, 0, 0, 0, 5, 0, 7 }; // source ofs 2, target ofs 3: target byte 1, src byte 1
-		//int mapping1[] = { 6, 0, 8, 0, 0, 0, 0, 0 }; // source ofs 2, target ofs 3: target byte 2, src byte 1
-		//int mapping1[] = { 0, 1, 0, 3, 2, 0, 4, 0 }; // source ofs 2, target ofs 3: target byte 2, src byte 2
-
-		//int mapping1[] = { 0, 0, 0, 0, 0, 1, 0, 3 }; // source ofs 0, target ofs 3: byte 1
-		int mapping1[] = { 2, 5, 4, 7, 6, 0, 8, 0 }; // source ofs 0, target ofs 3: byte 2		
-		
-		
-		
-		for(Integer i=0;i<256;i++) {
-			
-			String s = String.format("%8s", Integer.toBinaryString(i).toUpperCase()).replace(' ', '0');
-			
-			Integer out = 0;
-			
-			for(int x=0;x<8;x++) {
-							
-				int srcvalue = s.charAt(x) == '1' ? 1 : 0;
+		mapMap.put("pixel_move_lut_s0_t3_a", new int[] { 0, 0, 0, 0, 0, 1, 0, 3 });
+		mapMap.put("pixel_move_lut_s0_t3_b", new int[] { 2, 5, 4, 7, 6, 0, 8, 0 });		
 				
-				int map  = mapping1[7 - x];
+		mapMap.put("pixel_move_lut_s1_t0_a", new int[] { 2, 5, 4, 7, 6, 0, 8, 0 });
+		mapMap.put("pixel_move_lut_s1_t0_b", new int[] { 0, 0, 0, 0, 0, 1, 0, 3 });
+		
+		mapMap.put("pixel_move_lut_s1_t2_a", new int[] { 0, 0, 0, 0, 2, 5, 4, 7 });
+		mapMap.put("pixel_move_lut_s1_t2_b", new int[] { 6, 0, 8, 0, 0, 0, 0, 0 });
+		mapMap.put("pixel_move_lut_s1_t2_c", new int[] { 0, 1, 0, 3, 0, 0, 0, 0 });
+		
+		mapMap.put("pixel_move_lut_s1_t3_a", new int[] { 0, 0, 0, 0, 0, 2, 0, 4 });
+		mapMap.put("pixel_move_lut_s1_t3_b", new int[] { 5, 6, 7, 8, 0, 0, 0, 0 });
+		mapMap.put("pixel_move_lut_s1_t3_c", new int[] { 0, 0, 0, 0, 1, 0, 3, 0 });
 				
-				if (map > 0) {
-					out += srcvalue << (map - 1);	
+		mapMap.put("pixel_move_lut_s2_t0_a", new int[] { 5, 6, 7, 8, 0, 0, 0, 0 });
+		mapMap.put("pixel_move_lut_s2_t0_b", new int[] { 0, 0, 0, 0, 1, 2, 3, 4 });
+
+		
+		mapMap.put("pixel_move_lut_s2_t1_a", new int[] { 0, 5, 0, 7, 6, 0, 8, 0 });
+		mapMap.put("pixel_move_lut_s2_t1_b", new int[] { 0, 0, 0, 0, 0, 1, 0, 3 });
+		mapMap.put("pixel_move_lut_s2_t1_c", new int[] { 2, 0, 4, 0, 0, 0, 0, 0 });
+		
+				
+		mapMap.put("pixel_move_lut_s2_t3_a", new int[] { 0, 0, 0, 0, 0, 5, 0, 7 });
+		mapMap.put("pixel_move_lut_s2_t3_b", new int[] { 6, 0, 8, 0, 0, 0, 0, 0 });
+		mapMap.put("pixel_move_lut_s2_t3_c", new int[] { 0, 1, 0, 3, 2, 0, 4, 0 });		
+		
+		mapMap.put("pixel_move_lut_s3_t0_a", new int[] { 6, 0, 8, 0, 0, 0, 0, 0 });
+		mapMap.put("pixel_move_lut_s3_t0_b", new int[] { 0, 1, 0, 3, 2, 5, 4, 7 });							
+			
+		mapMap.put("pixel_move_lut_s3_t1_a", new int[] { 0, 6, 0, 8, 0, 0, 0, 0 });
+		mapMap.put("pixel_move_lut_s3_t1_b", new int[] { 0, 0, 0, 0, 1, 2, 3, 4 });
+		mapMap.put("pixel_move_lut_s3_t1_c", new int[] { 5, 0, 7, 0, 0, 0, 0, 0 });
+
+		mapMap.put("pixel_move_lut_s3_t2_a", new int[] { 0, 0, 0, 0, 6, 0, 8, 0 });
+		mapMap.put("pixel_move_lut_s3_t2_b", new int[] { 0, 0, 0, 0, 0, 1, 0, 3 });
+		mapMap.put("pixel_move_lut_s3_t2_c", new int[] { 2, 5, 4, 7, 0, 0, 0, 0 });		
+		
+	}
+	
+	public String bittable() {
+		
+		String ret = "// Conversion table for bitmap font output\n";
+		
+		for (Map.Entry<String, int[]> entry : mapMap.entrySet()) {
+			
+			ret += entry.getKey() + ":\n.byte ";
+			
+			for(int i=0; i<256; i++) {
+			//for(int j=0; j<8; j++) {
+				
+				//int i = 1 << j; 
+				
+				String s = String.format("%8s", Integer.toBinaryString(i).toUpperCase()).replace(' ', '0');
+				
+				System.out.print(s + " ");
+				
+				Integer out = 0;
+				for(int targetBitNum=0;targetBitNum<8;targetBitNum++) {
+								
+					// get src bit number from array
+					int srcBitNum = entry.getValue()[targetBitNum];
+					
+					if (srcBitNum > 0) {
+						
+						srcBitNum--; // LSB=Bit 7 / MSB=Bit 0 
+						
+						// 	get the source bit state
+						int srcvalue = s.charAt(srcBitNum) == '1' ? 1 : 0;
+					
+						out += srcvalue << (7-targetBitNum); // LSB=Bit 7 / MSB=Bit 0 
+					}
 				}
 				
-			}
-
-			String outstring = String.format("%8s", Integer.toBinaryString(out).toUpperCase()).replace(' ', '0');
-			
-			// System.out.println(s + " " + outstring);
-			
-			String outstring1 = String.format("$%2s", Integer.toHexString(out).toUpperCase()).replace(' ', '0');
-			System.out.print(outstring1 + ",");
+				System.out.println(String.format("%8s", Integer.toBinaryString(out).toUpperCase()).replace(' ', '0'));
+				
+				ret += String.format("$%2s", Integer.toHexString(out).toUpperCase()).replace(' ', '0');
+				
+				if(i < 255) {
+					ret += ",";
+				} else {
+					ret += "\n";
+				}
+				
+			}		
 			
 		}
+		
+		return ret;
 		
 	}
 	
