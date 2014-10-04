@@ -6,7 +6,7 @@ dbmc_jumptable:
 .word dbmc_s0_t0, dbmc_s0_t1, dbmc_s0_t2, dbmc_s0_t3
 .word dbmc_s1_t0, dbmc_s1_t1, dbmc_s1_t2, dbmc_s1_t3
 .word dbmc_s2_t0, dbmc_s2_t1, dbmc_s2_t2, dbmc_s2_t3
-.word dbmc_s3_t0, dbmc_s3_t1, dbmc_s3_t2, dbmc_s0_t3
+.word dbmc_s3_t0, dbmc_s3_t1, dbmc_s3_t2, dbmc_s3_t3
 
 dbmc_s0_t0: :DrawBitmapChar_Source0_Target0() rts
 dbmc_s0_t1: :DrawBitmapChar_Source0_Target1() rts
@@ -136,22 +136,35 @@ dbmc_s3_t3: :DrawBitmapChar_Source3_Target3() rts
 
 .macro DrawBitmapText() {
 
+	// current char pointer
 	lda #0
-	sta ZP13 
-	
-	lda framecount
-	lsr
-	lsr
-	and #$3f
-	sta ZP14
-	lda #64
-	sec
-	sbc ZP14
+	sta bf_char_index
 
-
-	pha
+	// current x pos
+	lda #0
+	sta bf_xpos
 	
-	:DrawBitmapChar()
+	loop:
+		ldy bf_char_index
+		lda text2,y
+		sta ZP13
+		
+		lda bf_xpos
+		pha		
+		:DrawBitmapChar()		
+		
+		inc bf_char_index
+		lda bf_char_index
+		cmp #10
+		beq exit
+		
+		lda bf_xpos
+		adc #5
+		sta bf_xpos
+		
+		jmp loop
+		
+	exit:	
 					
 }
 
@@ -249,19 +262,19 @@ dbmc_s3_t3: :DrawBitmapChar_Source3_Target3() rts
 
 /* Offsets: Source 0, Target 3
 // source:      target:
-// 1 2  5 6     x x  x 1  2 5  6 x 
-// 3 4  7 8     x x  x 3  4 7  8 x
+// 1 2  5 6     x x  x 1 | 2 5  6 x 
+// 3 4  7 8     x x  x 3 | 4 7  8 x
 //
 // 1st target byte				2nd target byte
 // src bit      target bit          src bit      target bit
-// x			1			        2            1			
-// x			2			        5            2			
-// x			3					4            3			
-// x			4					7			 4			
-// x			5					6			 5			
-// 1			6					x			 6			
-// x			7 					8			 7			
-// 3			8					x			 8			
+//  			1			        2            1			
+//  			2			        5            2			
+//  			3					4            3			
+//  			4					7			 4			
+//  			5					6			 5			
+// 1			6					 			 6			
+//  			7 					8			 7			
+// 3			8					 			 8			
 */
 .macro DrawBitmapChar_Source0_Target3() {
 	:MaskTarget3()

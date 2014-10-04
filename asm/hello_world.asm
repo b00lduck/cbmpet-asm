@@ -21,9 +21,7 @@
 	.word !+
 	.byte 1, 0
 rp:	.byte $9e, $20
-	.byte $31, $33, $33, $37
-	.text ":"
-	.byte $9b,0
+	.byte $31, $33, $33, $37, 0
 !:	.word !+
 	.byte 2, $00
 	.byte $8f, $20
@@ -55,7 +53,10 @@ rp:	.byte $9e, $20
 
 .pc = MAIN "Main code" {
 	
-	start:				
+	start:	
+	
+		:SaveZeroPage()
+	
 		cld
 	
 		:ClearScreen()	
@@ -86,7 +87,7 @@ rp:	.byte $9e, $20
 						
 	mainloop:	
 
-		// ?? (something with interrupt)
+		// set timer 2 to zero
 		lda #$00		
 		sta $E848	
 		sta $E849	
@@ -164,7 +165,7 @@ rp:	.byte $9e, $20
 		:DrawMemoryNA()
 		//DrawOuterBox(framecount)	
 
-		// copy counter to zp1
+		// copy timer 2 to zp1
 		lda $e848
 		sta ZP1
 		lda $e849	
@@ -186,17 +187,16 @@ rp:	.byte $9e, $20
 		:ItoA(text1 + 20, frames)				
 				
 		:DrawTextZt(1, 23, text1)		
+							
+		jsr $ffe4
 		
-		lda $97
-		cmp #$ff		// check for keystroke
-		
-		bne end					
-		
+		bne end								
 		jmp mainloop	
 		
-	end:		
-		lda #$00
-		sta $9e	// set keyboard buffer len to $00		
+	end:
+
+		//:RestoreZeroPage()
+							
 	    :RestoreIsr()
 		:ClearHome()			
 		:SwitchGraphics()			
@@ -204,9 +204,7 @@ rp:	.byte $9e, $20
 		rts
 
 		
-	/**
-     *	Interrupt service routine	
-	 */
+	// Interrupt service routine	
 	isr:			
 		
 		// advance frames
@@ -216,7 +214,7 @@ rp:	.byte $9e, $20
 		adc #01
 		sta frames
 		cld // decimal mode off		
-		cmp #$50
+		cmp #$60
 		bne wigga
 		
 		// advance seconds				
@@ -244,6 +242,7 @@ rp:	.byte $9e, $20
 				
 	wigga:
 		inc framecount			
+				
 		jmp (orig_isr)		// jump to original interrupt	
 		
 		
@@ -397,12 +396,18 @@ orig_isr: 		.dword 	0
 lut:			.byte 	$20,$7e,$7c,98+128,123,97,127+128,108+128,108,127,97+128,123+128,98,124+128,126+128,160
 lut1:			.byte   $20,$6c,$7b,$62,$7c,$e1,$ff,$fe,$7e,$7f,$61,$fc,$e2,$fb,$ec,$a0
 shift_lut:		.byte	$01,$02,$04,$08,$10,$20,$40,$80,$FF
+
+bf_char_index:	.byte   0
+bf_xpos:		.byte   0
 		
 .pc = VVRAM "Virtual video RAM (VVRAM)" virtual
 vvram: .fill 320,0
 
 .pc = VRAM "Hardware video RAM (VRAM)" virtual
 vram: .fill 1000,0
+
+.pc = ZP_BACKUP "Zero page backup" virtual
+zp_backup: .fill 256,0
 
 
 

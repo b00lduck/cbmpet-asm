@@ -16,6 +16,9 @@ hello4:
 	
 text1:
 	.text "Elapsed time: 00:00.00" .byte 0
+	
+text2:
+	.text "b00lduck  " .byte 0
 		
 .var image2Data = LoadBinary("../data/b00lduck.nar")
 image2: .fill image2Data.getSize(), image2Data.get(i)

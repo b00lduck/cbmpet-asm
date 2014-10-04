@@ -1,3 +1,22 @@
+.macro SaveZeroPage() {
+		ldx #0
+	loop:
+		lda $00,x
+		sta zp_backup,x
+		inx
+		bne loop
+}
+
+.macro RestoreZeroPage() {
+		ldx #0
+	loop:
+		lda zp_backup,x
+		sta $00,x
+		inx
+		bne loop
+}
+
+
 /**
  * Set the interrupt vector to 'addr' and store the original value to 'orig_isr'
  * Affected: AC,ZERO
