@@ -81,6 +81,8 @@ rp:	.byte $9e, $20
 		
 		lda #$ff
 		sta ZP8
+		
+
 						
 	mainloop:	
 

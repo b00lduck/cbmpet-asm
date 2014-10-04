@@ -3,7 +3,10 @@
 
 
 dbmc_jumptable:
-.word dbmc_s0_t0, dbmc_s0_t1, dbmc_s0_t2, dbmc_s0_t3, dbmc_s1_t0, dbmc_s1_t1, dbmc_s1_t2, dbmc_s1_t3, dbmc_s2_t0, dbmc_s2_t1, dbmc_s2_t2, dbmc_s2_t3, dbmc_s3_t0, dbmc_s3_t1, dbmc_s3_t2, dbmc_s0_t3
+.word dbmc_s0_t0, dbmc_s0_t1, dbmc_s0_t2, dbmc_s0_t3
+.word dbmc_s1_t0, dbmc_s1_t1, dbmc_s1_t2, dbmc_s1_t3
+.word dbmc_s2_t0, dbmc_s2_t1, dbmc_s2_t2, dbmc_s2_t3
+.word dbmc_s3_t0, dbmc_s3_t1, dbmc_s3_t2, dbmc_s0_t3
 
 dbmc_s0_t0: :DrawBitmapChar_Source0_Target0() rts
 dbmc_s0_t1: :DrawBitmapChar_Source0_Target1() rts
@@ -125,14 +128,9 @@ dbmc_s3_t3: :DrawBitmapChar_Source3_Target3() rts
 		lda ZP1+1
 		adc #0
 		sta ZP1+1		
-		
-				
-				
 				
 	jump:
 		jsr dbmc_s0_t0 // first address byte will be overwritten at runtime (see above)
-				
-	
 	
 }
 
@@ -142,7 +140,6 @@ dbmc_s3_t3: :DrawBitmapChar_Source3_Target3() rts
 	sta ZP13 
 	
 	lda framecount
-	lsr
 	lsr
 	lsr
 	and #$3f
@@ -155,7 +152,6 @@ dbmc_s3_t3: :DrawBitmapChar_Source3_Target3() rts
 	pha
 	
 	:DrawBitmapChar()
-	
 					
 }
 

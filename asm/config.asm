@@ -5,14 +5,14 @@
 .const VVRAM_SIZE=$013f
 .const VVRAM_END=VVRAM+VVRAM_SIZE
 
-.const DATA = $4000
+.const DATA = $1000
 
-.const DBMF_SUBROUTINES=$5a8a
-.const DBMF_TABLES=$6000
+.const DBMF_SUBROUTINES=DATA + $300
+.const DBMF_TABLES=DBMF_SUBROUTINES + $900
 
-.const PETSCIITABLE=$7ff0
+.const PETSCIITABLE=$04f0
 
-.const GLOBALS=$7f40
+.const GLOBALS=$0470
 
 .const ZP1=$e0
 .const ZP2=$e2
@@ -21,7 +21,7 @@
 .const ZP5=$e8
 .const ZP6=$ea
 .const ZP7=$ec
-.const ZP8=$ee // PRNG 16
+.const ZP8=$f6 // PRNG 16
 
 .const ZP10=$f0
 .const ZP11=$f1
