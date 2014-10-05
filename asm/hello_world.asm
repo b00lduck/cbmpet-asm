@@ -14,8 +14,7 @@
 .import source "macros_text.asm"
 .import source "macros_vram.asm"
 .import source "macros_vvram.asm"
-.import source "macros_bitmap_font.asm"
-.import source "data_bitmap_font_table.asm"
+.import source "bitmap_font/bitmap_font_macros.asm"
 
 .pc = BASIC "Basic upstart" {
 	.word !+
@@ -51,7 +50,7 @@ rp:	.byte $9e, $20
 }
 
 
-.pc = MAIN "Main code" {
+.pc = MAIN "Main code"
 	
 	start:	
 	
@@ -372,10 +371,12 @@ rp:	.byte $9e, $20
 		rts	
 	}
 	
-	
-	.import source "data.asm"
 
-}
+.import source "bitmap_font/bitmap_font_data.asm"
+	
+.import source "data.asm"
+
+
 
 .pc = GLOBALS "Global variables"
 
@@ -408,9 +409,3 @@ vram: .fill 1000,0
 
 .pc = ZP_BACKUP "Zero page backup" virtual
 zp_backup: .fill 256,0
-
-
-
-
-
-

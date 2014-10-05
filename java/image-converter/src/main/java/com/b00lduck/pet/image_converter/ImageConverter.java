@@ -29,7 +29,7 @@ public class ImageConverter {
 		ImageConverter imageConverter = new ImageConverter();
 		
 		
-		imageConverter.createBittable("D:\\PET\\asm\\data_bitmap_font_table.asm");
+		imageConverter.createBittable("D:\\PET\\asm\\bitmap_font\\bitmap_font_table_generated.asm");
 		
 		//imageConverter.convert("D:\\PET\\data\\b00lduck.raw", "D:\\PET\\data\\b00lduck.rle");
 		imageConverter.convertNa("D:\\PET\\data\\b00lduck.raw", "D:\\PET\\data\\b00lduck.nar");
