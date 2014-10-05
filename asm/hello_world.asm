@@ -17,38 +17,8 @@
 .import source "vvram_common/vvram_common_macros.asm"
 .import source "vvram_mode2/vvram_mode2_macros.asm"
 
-.pc = BASIC "Basic upstart" {
-	.word !+
-	.byte 1, 0
-rp:	.byte $9e, $20
-	.byte $31, $33, $33, $37, 0
-!:	.word !+
-	.byte 2, $00
-	.byte $8f, $20
-	.text "PET-A-BYTE"
-	.byte 0
-!:	.word !+
-	.byte 3, $00
-	.byte $8f, $20
-	.text "      "
-	.text "BY B00LDUCK"
-	.byte 0	
-!:	.word !+
-	.byte 5,$00
-	.byte $8f, $20
-	.text "CODE:  GRAF HARDT"
-	.byte 0
-!:	.word !+
-	.byte 7, $00
-	.byte $8f, $20
-	.text "HARDWARE: DR ERGO"
-	.byte 0
-!:	.word !+
-	.byte 11, $00
-	.byte $80
-	.byte 0		
-!:	.byte 0,0
-}
+.import source "basic_upstart.asm"
+.import source "globals.asm"
 
 
 .pc = MAIN "Main code"
@@ -372,9 +342,7 @@ rp:	.byte $9e, $20
 		rts	
 	}
 
-data:
-
-.pc = data "Main data"
+data: .pc = data "Main data"
 
 .import source "data.asm"
 
@@ -383,20 +351,6 @@ data:
 .import source "vvram_mode2/vvram_mode2_data.asm"
 	
 
-.pc = GLOBALS "Global variables"
-
-active_phase:	.byte 0
-phase_counter:	.byte 0
-
-perfcount: 		.byte 	0
-
-framecount: 	.dword 	0
-
-frames:  		.byte 	0
-seconds: 		.byte 	0
-minutes: 		.byte 	0
-       
-orig_isr: 		.dword 	0
 
 lut:			.byte 	$20,$7e,$7c,98+128,123,97,127+128,108+128,108,127,97+128,123+128,98,124+128,126+128,160
 lut1:			.byte   $20,$6c,$7b,$62,$7c,$e1,$ff,$fe,$7e,$7f,$61,$fc,$e2,$fb,$ec,$a0
