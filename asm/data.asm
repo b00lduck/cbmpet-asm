@@ -13,16 +13,32 @@ text1:
 	
 text2:
 	.text "b00lduck  " .byte 0
-			
-data_images: .pc = data_images "Images"			
-			
-.var image2Data = LoadBinary("../data/b00lduck.nar")
-image2: .fill image2Data.getSize(), image2Data.get(i)
-image2_size: .word image2Data.getSize()
 
-data_font: .pc = data_font "Font"	
+	
+!: .pc = !- "Image: b00lduck logo"			
+image2: :ConvertPicture("../data/b00lduck.png")
 
-.var font1Data = LoadBinary("../data/font1.nar")
-font1: .fill font1Data.getSize(), font1Data.get(i)
-font1_size: .word font1Data.getSize()
+!: .pc = !- "Font"			
+font1: :ConvertPicture("../data/font.png")
 
+		
+.macro ConvertPicture(FILENAME) {
+	
+	.var data = LoadPicture(FILENAME)
+	.for (var y = 0; y < 16; y++)
+		.for (var x = 0; x < 20; x++) {
+			.var sx = x * 4
+			.var sy = y * 2
+			.var value = 0
+			.eval value += data.getPixel(sx,sy) & 1 << 7
+			.eval value += data.getPixel(sx + 1,sy) & 1 << 6
+			.eval value += data.getPixel(sx,sy + 1) & 1 << 5
+			.eval value += data.getPixel(sx + 1,sy + 1) & 1 << 4
+			.eval value += data.getPixel(sx + 2,sy) & 1 << 3
+			.eval value += data.getPixel(sx + 3,sy) & 1 << 2
+			.eval value += data.getPixel(sx + 2,sy + 1) & 1 << 1
+			.eval value += data.getPixel(sx + 3,sy + 1) & 1 << 0			  
+			.byte value			  
+		}
+
+}
