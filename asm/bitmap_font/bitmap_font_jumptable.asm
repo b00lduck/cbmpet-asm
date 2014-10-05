@@ -1,6 +1,6 @@
 // Bitmap font jumptable
 
-.pc = DBMF_SUBROUTINES "Draw Bitmap Font Subroutines" 
+.align $0020
 
 dbmc_jumptable:
 .word dbmc_s0_t0, dbmc_s0_t1, dbmc_s0_t2, dbmc_s0_t3

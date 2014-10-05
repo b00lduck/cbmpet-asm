@@ -1,5 +1,5 @@
 // THIS FILE IS GENERATED - DO NOT CHANGE!
-.pc = DBMF_TABLES "Lookup tables (aligned)"
+//.pc = DBMF_TABLES "Lookup tables (aligned)"
 .align $0100
 // Conversion table for bitmap font output
 pixel_move_lut_s0_t1_a:

@@ -13,8 +13,9 @@
 .import source "macros.asm"
 .import source "macros_text.asm"
 .import source "macros_vram.asm"
-.import source "macros_vvram.asm"
 .import source "bitmap_font/bitmap_font_macros.asm"
+.import source "vvram_common/vvram_common_macros.asm"
+.import source "vvram_mode2/vvram_mode2_macros.asm"
 
 .pc = BASIC "Basic upstart" {
 	.word !+
@@ -370,19 +371,22 @@ rp:	.byte $9e, $20
 		sta ZP8+1
 		rts	
 	}
-	
 
-.import source "bitmap_font/bitmap_font_data.asm"
-	
+data:
+
+.pc = data "Main data"
+
 .import source "data.asm"
 
-
+.import source "bitmap_font/bitmap_font_data.asm"
+.import source "vvram_common/vvram_common_data.asm"
+.import source "vvram_mode2/vvram_mode2_data.asm"
+	
 
 .pc = GLOBALS "Global variables"
 
 active_phase:	.byte 0
 phase_counter:	.byte 0
-
 
 perfcount: 		.byte 	0
 
@@ -397,12 +401,6 @@ orig_isr: 		.dword 	0
 lut:			.byte 	$20,$7e,$7c,98+128,123,97,127+128,108+128,108,127,97+128,123+128,98,124+128,126+128,160
 lut1:			.byte   $20,$6c,$7b,$62,$7c,$e1,$ff,$fe,$7e,$7f,$61,$fc,$e2,$fb,$ec,$a0
 shift_lut:		.byte	$01,$02,$04,$08,$10,$20,$40,$80,$FF
-
-bf_char_index:	.byte   0
-bf_xpos:		.byte   0
-		
-.pc = VVRAM "Virtual video RAM (VVRAM)" virtual
-vvram: .fill 320,0
 
 .pc = VRAM "Hardware video RAM (VRAM)" virtual
 vram: .fill 1000,0

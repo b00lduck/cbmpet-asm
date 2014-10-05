@@ -1,10 +1,9 @@
 .const BASIC = 			  	$0401
 .const GLOBALS = 			$0470
 .const PETSCIITABLE =		$04f0
+
 .const MAIN = 			  	$0539 // 1337
-.const DATA = 		      	$1000
-.const DBMF_SUBROUTINES = 	DATA + $300
-.const DBMF_TABLES = 	  	DBMF_SUBROUTINES + $900
+
 .const ZP_BACKUP = 		  	$7d00
 .const VVRAM =		 		$7e00
 .const VRAM =  				$8000
