@@ -12,7 +12,8 @@ text1:
 	.text "Elapsed time: 00:00.00" .byte 0
 	
 text2:
-	.text "b00lduck  " .byte 0
+	.text "    "
+	.text "b00lduck proudly presents: pet-a-byte - a short presentation of oldschool technology"
 
 	
 !: .pc = !- "Image: b00lduck logo"			
