@@ -122,6 +122,8 @@
 	
 }
 
+// bf_char_index
+// bf_xpos 
 .macro DrawBitmapText() {
 
 	// current char pointer
@@ -129,8 +131,7 @@
 	sta bf_char_index
 
 	// current x pos
-	lda #0
-	
+	lda #0	
 	sta bf_xpos
 	
 	loop:
