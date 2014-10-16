@@ -19,7 +19,7 @@ text2:
 !: .pc = !- "Image: b00lduck logo"			
 image2: :ConvertPicture("../data/b00lduck.png")
 
-!: .pc = !- "Font"			
+!: .pc = !- "Font: 5x6"			
 font1: :ConvertPicture("../data/font.png")
 
 		
