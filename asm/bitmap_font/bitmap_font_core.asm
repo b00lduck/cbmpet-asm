@@ -11,8 +11,8 @@
 //  x o  o o  o o  x x
 //  x o  o o  o o  x x
 .macro MaskTarget1() {
-	:MaskTargetByte(0,%11110000)
-	:MaskTargetByte(1,%00000101)	
+	:MaskTargetByte(0,%01010000)
+	:MaskTargetByte(1,%00001111)	
 }
 
 .macro MaskTarget2() {
@@ -35,16 +35,16 @@
 .macro DrawBitmapChar_Source0_Target0() {
 
 	:MaskTarget0()
-	
+		
 	ldy #0
 	lda (ZP2),y
 	sta (ZP1),y
 	
-	ldy #20
+	ldy #22
 	lda (ZP2),y
 	sta (ZP1),y
 	
-	ldy #40
+	ldy #44
 	lda (ZP2),y
 	sta (ZP1),y
 	
@@ -398,14 +398,14 @@
 	ora (ZP1),y				// add
 	sta (ZP1),y				// store to vram
 	
-	ldy #DELTA+20	
+	ldy #DELTA+22	
 	lda (ZP2),y				// load original font byte
 	tax						// copy it to x
 	lda LUT_TABLE,x			// lookup shifted font byte	
 	ora (ZP1),y				// add
 	sta (ZP1),y				// store to vram	
 	
-	ldy #DELTA+40
+	ldy #DELTA+44
 	lda (ZP2),y				// load original font byte
 	tax						// copy it to x
 	lda LUT_TABLE,x			// lookup shifted font byte	
@@ -422,19 +422,19 @@
 	ora (ZP1),y				// store to vram
 	sta (ZP1),y				// store to vram
 	
-	ldy #DELTA1+20	
+	ldy #DELTA1+22	
 	lda (ZP2),y				// load original font byte
 	tax						// copy it to x
 	lda LUT_TABLE,x			// lookup shifted font byte	
-	ldy #DELTA2+20	
+	ldy #DELTA2+22	
 	ora (ZP1),y				// store to vram
 	sta (ZP1),y				// store to vram	
 	
-	ldy #DELTA1+40
+	ldy #DELTA1+44
 	lda (ZP2),y				// load original font byte
 	tax						// copy it to x
 	lda LUT_TABLE,x			// lookup shifted font byte	
-	ldy #DELTA2+40	
+	ldy #DELTA2+44	
 	ora (ZP1),y				// store to vram
 	sta (ZP1),y				// store to vram	
 }
@@ -450,13 +450,13 @@
 	ora (ZP1),y				// store to vram
 	sta (ZP1),y				// store to vram
 	
-	ldy #20	
+	ldy #22	
 	lda (ZP2),y				// load original font byte
 	and #MASK_A
 	ora (ZP1),y				// store to vram
 	sta (ZP1),y				// store to vram	
 	
-	ldy #40
+	ldy #44
 	lda (ZP2),y				// load original font byte
 	and #MASK_A
 	ora (ZP1),y				// store to vram
@@ -469,13 +469,13 @@
 	ora (ZP1),y				// store to vram
 	sta (ZP1),y				// store to vram
 	
-	ldy #21	
+	ldy #23	
 	lda (ZP2),y				// load original font byte
 	and #MASK_I
 	ora (ZP1),y				// store to vram
 	sta (ZP1),y				// store to vram	
 	
-	ldy #41
+	ldy #45
 	lda (ZP2),y				// load original font byte
 	and #MASK_I
 	ora (ZP1),y				// store to vram
@@ -489,12 +489,12 @@
 	and #MASK
 	sta (ZP1),y
 	
-	ldy #OFS+20
+	ldy #OFS+22
 	lda (ZP1),y
 	and #MASK
 	sta (ZP1),y
 
-	ldy #OFS+40
+	ldy #OFS+44
 	lda (ZP1),y
 	and #MASK
 	sta (ZP1),y

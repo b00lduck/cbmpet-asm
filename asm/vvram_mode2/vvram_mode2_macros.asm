@@ -4,12 +4,12 @@
 
 	// Pointer to the VVRAM line (ZP1)
 
-	// ZP1 = VVRAM
+	// ZP1 = VVRAM+1 (padding 4px on the left side)
 	// ZP3 = $80A0
 	
-	lda #<VVRAM
+	lda #<VVRAM+1 // padding 4px = 1 byte
 	sta ZP1
-	lda #>VVRAM
+	lda #>VVRAM+1 // padding 4px = 1 byte
 	sta ZP1+1
 			
 	lda #$80
@@ -19,7 +19,7 @@
 	
 	.for(var i = 0; i < 16; i++) {
 		:DrawVVramLineNA()	
-		:IncZp8(ZP1,$14)
+		:IncZp8(ZP1,$16)
 		:IncZp8(ZP3,$28)
 	}
 
@@ -90,9 +90,9 @@
 
 	init:
 		// Load VVRAM address to ZP1
-		lda #$00
+		lda #<VVRAM
 		sta ZP1
-		lda #$30
+		lda #>VVRAM
 		sta ZP1+1
 		
 		// Load src Image address to ZP2
@@ -102,9 +102,9 @@
 		sta ZP2+1
 		
 		// Load Image end address to ZP3
-		lda #<image2+320
+		lda #<image2+352
 		sta ZP3
-		lda #>image2+320
+		lda #>image2+352
 		sta ZP3+1	
 		
 	loop:

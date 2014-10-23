@@ -7,7 +7,7 @@
 	adc #1
 	sta scroller_frame
 
-	cmp #4
+	cmp #2
 	bne !+
 	
 	lda #0
@@ -47,7 +47,7 @@
 	sta bf_char_index
 
 	// current x pos	
-	lda #2
+	lda #0
 	sta bf_xpos				
 */
 		
@@ -92,7 +92,7 @@
 		// If the current on-screen (VVRAM coordinates) x-position is above #79 exit the loop.
 		// We are done, because the right border of the screen is reached
 		// TODO-DOC: why #79?
-		cmp #79
+		cmp #90
 		bcs exit
 		
 		// Draw next character
@@ -153,7 +153,7 @@
 		beq endmul2
 		clc
 		lda ZP2
-		adc #80
+		adc #88
 		sta ZP2
 		lda ZP2+1
 		adc #0
@@ -208,7 +208,7 @@
 		sta ZP1+1		
 				
 		// check for clipping
-		cpx #77
+		cpx #87
 		bcc jump
 	
 	nojump:	

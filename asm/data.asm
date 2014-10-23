@@ -27,7 +27,7 @@ font1: :ConvertPicture("../data/font.png")
 	
 	.var data = LoadPicture(FILENAME)
 	.for (var y = 0; y < 16; y++)
-		.for (var x = 0; x < 20; x++) {
+		.for (var x = 0; x < 22; x++) {
 			.var sx = x * 4
 			.var sy = y * 2
 			.var value = 0
