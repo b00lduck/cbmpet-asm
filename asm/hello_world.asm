@@ -8,6 +8,7 @@
  * b00lduck on ARM - check!
  * b00luck on 6502 - check!
  * b00lduck on 68000 - to come
+ * b00lduck on Z80 - unlikely
  */
 .import source "config.asm"
 .import source "macros.asm"
@@ -63,7 +64,7 @@
 		sta $E849	
 
 		
-		:DrawBitmapText()
+		:DrawScroller()
 		
 		jmp maindraw
 		

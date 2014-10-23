@@ -1,6 +1,112 @@
 
 .import source "bitmap_font_core.asm"
 
+
+.macro DrawScroller() {
+
+	clc
+	lda scroller_frame
+	adc #1
+	sta scroller_frame
+
+	cmp #1
+	bne !+
+	
+	lda #0
+	sta scroller_frame
+	
+	clc
+	lda scroller_subpos
+	adc #1
+	sta scroller_subpos
+	
+	cmp #5
+	bne !+
+	
+	lda #0
+	sta scroller_subpos
+	
+	clc
+	lda scroller_pos
+	adc #1
+	sta scroller_pos	
+	
+	
+
+	
+!:
+	
+	
+	// The current char index of the text
+	lda scroller_pos
+	sta bf_char_index
+
+	// current x pos	
+	sec
+	lda #5
+	sbc scroller_subpos
+	sta bf_xpos				
+		
+	:DrawBitmapText()
+}
+
+
+// Expects the following variables from bitmap_font_data to be set:
+// bf_char_index	(The current char index of the text)
+// bf_xpos 			(The current x-position on the screen)
+.macro DrawBitmapText() {
+	
+
+	
+	loop:
+
+		// Load the on-screen (VVRAM coordinates) x-position from bf_xpos into X-Register (XR)
+		ldx bf_xpos
+
+		// Lookup which char we gonna draw and store it in the accumulator (AC)
+		ldy bf_char_index
+		lda text2,y
+		
+		// Draw the whole char into VVRAM.
+		// Now:
+		// 		XR is the x-position (VVRAM coordinates)
+		// 		AC is the character to be drawn
+		:DrawBitmapChar()		
+		
+		// Increment the char index (bf_char_index)
+		inc bf_char_index
+		lda bf_char_index
+		
+		// check for end
+		//cmp #15		
+		//beq exit
+		
+		// Increment the on-screen (VVRAM coordinates) x-position (bf_xpos) by 5
+		lda bf_xpos
+		adc #5
+		sta bf_xpos
+		
+		// If the current on-screen (VVRAM coordinates) x-position is above #79 exit the loop.
+		// We are done, because the right border of the screen is reached
+		// TODO-DOC: why #79?
+		cmp #79
+		bcs exit
+		
+		// Draw next character
+		jmp loop
+		
+	exit:	
+					
+}
+
+
+
+
+
+
+
+
+
 // determine x pixel offset of the desired character in the source bitmap
 // determine y pixel offser of the desired character in the source bitmap
 // choose one of the DrawBitmapChar macros depending on the modulo of the y offset
@@ -8,8 +114,7 @@
 // IN: 
 // 		AC:	char id
 // 		XR:	x position
-.macro DrawBitmapChar() {	
-		
+.macro DrawBitmapChar() {			
 		
 		// determine y-char-index and store in ZP14 for later use
 		sta ZP13	// store char id for later use
@@ -120,54 +225,4 @@
 		
 	exit:
 	
-}
-
-// bf_char_index
-// bf_xpos 
-.macro DrawBitmapText() {
-
-	// current char pointer
-	lda #0
-	sta bf_char_index
-
-	// current x pos
-	lda #0	
-	sta bf_xpos
-	
-	loop:
-
-		// X-pos in XR
-		ldx bf_xpos
-
-		// Char to draw in AC
-		ldy bf_char_index
-		lda text2,y		
-		:DrawBitmapChar()		
-		
-		// increment char index
-		inc bf_char_index
-		lda bf_char_index
-		
-		// check for end
-		//cmp #15		
-		//beq exit
-		
-		// inc xpos by 5
-		lda bf_xpos
-		adc #5
-		sta bf_xpos
-		
-		cmp #79
-		bcs exit
-		
-		jmp loop
-		
-	exit:	
-					
-}
-
-
-
-.macro DrawScroller() {
-	:DrawBitmapText()
 }
