@@ -1,12 +1,18 @@
 // Bitmap font core macros
 
-.macro MaskTarget0() {
-	:MaskTargetByte(1,%01011111)
-}
 
+//  o o  o o  o x  x x
+//  o o  o o  o x  x x
+.macro MaskTarget0() {
+	:MaskTargetByte(0,%00000000)	
+	:MaskTargetByte(1,%01011111)	
+}
+ 
+//  x o  o o  o o  x x
+//  x o  o o  o o  x x
 .macro MaskTarget1() {
-	:MaskTargetByte(0,%10100000)
-	:MaskTargetByte(1,%00001111)	
+	:MaskTargetByte(0,%11110000)
+	:MaskTargetByte(1,%00000101)	
 }
 
 .macro MaskTarget2() {

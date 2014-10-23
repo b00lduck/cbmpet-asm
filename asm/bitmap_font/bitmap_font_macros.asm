@@ -1,6 +1,4 @@
-
 .import source "bitmap_font_core.asm"
-
 
 .macro DrawScroller() {
 
@@ -9,7 +7,7 @@
 	adc #1
 	sta scroller_frame
 
-	cmp #1
+	cmp #4
 	bne !+
 	
 	lda #0
@@ -22,7 +20,7 @@
 	
 	cmp #5
 	bne !+
-	
+		
 	lda #0
 	sta scroller_subpos
 	
@@ -30,12 +28,8 @@
 	lda scroller_pos
 	adc #1
 	sta scroller_pos	
-	
-	
-
-	
+		
 !:
-	
 	
 	// The current char index of the text
 	lda scroller_pos
@@ -45,9 +39,20 @@
 	sec
 	lda #5
 	sbc scroller_subpos
+	sta bf_xpos			
+
+/*
+	// The current char index of the text
+	lda #0
+	sta bf_char_index
+
+	// current x pos	
+	lda #2
 	sta bf_xpos				
+*/
 		
 	:DrawBitmapText()
+		
 }
 
 
@@ -55,8 +60,6 @@
 // bf_char_index	(The current char index of the text)
 // bf_xpos 			(The current x-position on the screen)
 .macro DrawBitmapText() {
-	
-
 	
 	loop:
 
@@ -98,14 +101,6 @@
 	exit:	
 					
 }
-
-
-
-
-
-
-
-
 
 // determine x pixel offset of the desired character in the source bitmap
 // determine y pixel offser of the desired character in the source bitmap
@@ -176,8 +171,7 @@
 		rol
 		
 		sta ZP10 	// store intermediate result
-		
-					
+							
 		txa			// get target x-offset
 		and #3		// use two bits
 		clc			// add it
