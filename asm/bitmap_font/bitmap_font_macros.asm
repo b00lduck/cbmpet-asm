@@ -1,14 +1,17 @@
 .import source "bitmap_font_core.asm"
 
-.macro DrawScroller() {
+.macro AdvanceScroller() {
 
 	clc
 	lda scroller_frame
 	adc #1
 	sta scroller_frame
 
-	cmp #2
+	cmp #3
 	bne !+
+	
+	lda #1
+	sta scroller_changed
 	
 	lda #0
 	sta scroller_frame
@@ -30,7 +33,7 @@
 	sta scroller_pos	
 		
 !:
-	
+
 	// The current char index of the text
 	lda scroller_pos
 	sta bf_char_index
@@ -39,7 +42,39 @@
 	sec
 	lda #5
 	sbc scroller_subpos
-	sta bf_xpos			
+	sta bf_xpos		
+
+
+}
+
+.macro DrawScroller() {
+
+	lda scroller_changed
+	bne draw
+	jmp exit
+	
+	draw:
+	
+	// set bf_yoff
+	lda #0
+	sta bf_yoff
+	
+	lda framecount
+	and #%0
+	tay	
+	
+	mul:
+		beq endmul
+		clc
+		lda bf_yoff
+		adc #22
+		sta bf_yoff
+		lda bf_yoff+1
+		adc #0
+		sta bf_yoff+1
+		dey
+		jmp mul
+	endmul:			
 
 /*
 	// The current char index of the text
@@ -52,6 +87,11 @@
 */
 		
 	:DrawBitmapText()
+	
+	lda #0
+	sta scroller_changed
+	
+	exit:
 		
 }
 
@@ -190,7 +230,20 @@
 		lda #<VVRAM
 		sta ZP1
 		lda #>VVRAM
-		sta ZP1+1		
+		sta ZP1+1	
+
+							
+		// add bf_yoff to ZP1
+		clc
+		lda ZP1
+		adc bf_yoff
+		sta ZP1
+		lda ZP1+1
+		adc bf_yoff+1
+		sta ZP1+1
+		
+		
+		
 		
 		// get offset
 		txa

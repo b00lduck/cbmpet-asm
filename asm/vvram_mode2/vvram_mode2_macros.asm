@@ -86,7 +86,7 @@
 }
 
 
-.macro LoadImageNA() {
+.macro LoadImageNA(IMAGE) {
 
 	init:
 		// Load VVRAM address to ZP1
@@ -96,15 +96,15 @@
 		sta ZP1+1
 		
 		// Load src Image address to ZP2
-		lda #<image2
+		lda #<IMAGE
 		sta ZP2
-		lda #>image2
+		lda #>IMAGE
 		sta ZP2+1
 		
 		// Load Image end address to ZP3
-		lda #<image2+352
+		lda #<IMAGE+352
 		sta ZP3
-		lda #>image2+352
+		lda #>IMAGE+352
 		sta ZP3+1	
 		
 	loop:

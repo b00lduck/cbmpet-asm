@@ -12,12 +12,19 @@ text1:
 	.text "Elapsed time: 00:00.00" .byte 0
 	
 text2:
-	.text "              "
-	.text "b00lduck proudly presents: pet-a-byte: a short presentation of oldschool technology by graf hardt and dr ergo. scroller is in the house. yeeeehaw.... over and out                    " 
+	.text "                 "
+	.text "b00lduck proudly presents: pet-a-byte: a short presentation of oldschool technology by graf hardt and dr.ergo. a scroller is in the house. yeeeehaw.... over and out                    " 
 
 	
 !: .pc = !- "Image: b00lduck logo"			
 image2: :ConvertPicture("../data/b00lduck.png")
+
+!: .pc = !- "Image: verfassungsschutz logo"			
+image3: :ConvertPicture("../data/demo1.png")
+
+!: .pc = !- "Image: NRW logo"			
+image4: :ConvertPicture("../data/Demo2.png")
+
 
 !: .pc = !- "Font: 5x6"			
 font1: :ConvertPicture("../data/font.png")

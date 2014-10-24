@@ -34,7 +34,7 @@
 		:ClearVVRAM()
 		//:Checkerboard2()
 		//:LoadImage()
-		//:LoadImageNA()
+		//:LoadImageNA(image4)
 		:SwitchLowercase()
 		
 		:DrawTextZt(2, 18, hello2)
@@ -63,12 +63,9 @@
 		sta $E848	
 		sta $E849	
 
-		
 		:DrawScroller()
 		
 		jmp maindraw
-		
-		
 		
 		// 00:00.00 start first phase
 		lda frames
@@ -123,10 +120,7 @@
 		
 		//jsr invert
 
-		jmp maindraw
-				
-				
-				
+		jmp maindraw											
 					
 				
 	maindraw:
@@ -176,8 +170,8 @@
 
 		
 	// Interrupt service routine	
-	isr:			
-		
+	isr:		
+	
 		// advance frames
 		sed // decimal mode on				
 		clc
@@ -213,6 +207,8 @@
 				
 	wigga:
 		inc framecount			
+
+		:AdvanceScroller()				
 				
 		jmp (orig_isr)		// jump to original interrupt	
 		
