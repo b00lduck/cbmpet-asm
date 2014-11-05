@@ -25,6 +25,18 @@ image3: :ConvertPicture("../data/demo1.png")
 !: .pc = !- "Image: Scroller background"			
 image4: :ConvertPicture("../data/scroller_bg.png")
 
+!: .pc = !- "Image: Donut car 1"			
+donutcar1: :ConvertPicture("../data/DonutCar1.png")
+
+!: .pc = !- "Image: Donut car 2"			
+donutcar2: :ConvertPicture("../data/DonutCar2.png")
+
+!: .pc = !- "Image: Donut car 3"			
+donutcar3: :ConvertPicture("../data/DonutCar3.png")
+
+
+!: .pc = !- "Image: Bus"			
+bus: :ConvertPicture("../data/Bus.png")
 
 !: .pc = !- "Font: 5x6"			
 font1: :ConvertPicture("../data/font.png")
