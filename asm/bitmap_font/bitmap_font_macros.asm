@@ -1,4 +1,5 @@
 .import source "bitmap_font_core.asm"
+.import source "bitmap_font_core_vertical.asm"
 
 .macro AdvanceScroller() {
 
@@ -7,8 +8,8 @@
 	adc #1
 	sta scroller_frame
 
-	cmp #3
-	bne !+
+	cmp #5
+	bne no_change
 	
 	lda #1
 	sta scroller_changed
@@ -22,7 +23,7 @@
 	sta scroller_subpos
 	
 	cmp #5
-	bne !+
+	bne fine_change_only
 		
 	lda #0
 	sta scroller_subpos
@@ -32,18 +33,120 @@
 	adc #1
 	sta scroller_pos	
 		
-!:
+fine_change_only:
 
 	// The current char index of the text
 	lda scroller_pos
 	sta bf_char_index
-
+	
 	// current x pos	
 	sec
 	lda #5
 	sbc scroller_subpos
 	sta bf_xpos		
 
+no_change:
+
+}
+
+.macro ClearScrollerTarget() {
+
+	ldx #0
+	
+loop:
+	lda #0
+	sta VVRAM,x	
+	inx
+	txa
+	cmp #88
+	bne loop
+
+}
+
+.macro CopyScroller() {
+
+	:ClearScrollerTarget()
+				
+		// load the source VVRAM_TEMP address and store in ZP1
+		lda #<VVRAM_TEMP+1 // +1 because invisible area should be skipped
+		sta ZP1
+		lda #>VVRAM_TEMP+1
+		sta ZP1+1	
+		
+		// load the target VVRAM address and store in ZP2
+		lda #<VVRAM+1 // +1 because invisible area should be skipped
+		sta ZP2
+		lda #>VVRAM+1
+		sta ZP2+1			
+
+		
+		lda #20
+		sta ZP10
+
+	loop:
+		sec
+		sbc #1
+		sta ZP10		
+		
+		
+		// now determine the case id and store it in ZP12
+		
+		// multiply offset by 4
+		asl
+		asl
+		sta ZP11
+		tax
+		
+		// get the first (MSB) bit
+		lda yoff_array,x
+		and #1
+		asl
+		asl
+		asl
+		sta ZP12 // the case id is in ZP12
+		
+		inx
+		lda yoff_array,x
+		and #1
+		asl
+		asl
+		clc
+		adc ZP12 // add to case id in ZP12
+		sta ZP12
+
+		inx
+		lda yoff_array,x
+		and #1
+		asl
+		clc
+		adc ZP12 // add to case id in ZP12
+		sta ZP12
+
+		inx
+		lda yoff_array,x
+		and #1
+		clc
+		adc ZP12 // add to case id in ZP12
+		sta ZP12
+
+
+		// determine jump address
+		rol // multiply by two, because jumptable has 16 bit addresses
+		tay			
+
+		// set the jump address of the draw routine
+		lda vm_jumptable,y
+		sta jump+1
+		lda vm_jumptable+1,y
+		sta jump+2
+				
+		
+		ldy ZP10
+	jump:		
+		jsr vm0000
+		
+		lda ZP10
+		bne loop
 
 }
 
@@ -227,9 +330,9 @@
 		sta jump+2
 				
 		// load the target VVRAM address and store in ZP1
-		lda #<VVRAM
+		lda #<VVRAM_TEMP
 		sta ZP1
-		lda #>VVRAM
+		lda #>VVRAM_TEMP
 		sta ZP1+1	
 
 							

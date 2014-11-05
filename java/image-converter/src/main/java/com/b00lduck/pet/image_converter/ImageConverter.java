@@ -32,9 +32,9 @@ public class ImageConverter {
 		imageConverter.createBittable("D:\\PET\\asm\\bitmap_font\\bitmap_font_table_generated.asm");
 		
 		//imageConverter.convert("D:\\PET\\data\\b00lduck.raw", "D:\\PET\\data\\b00lduck.rle");
-		imageConverter.convertNa("D:\\PET\\data\\b00lduck.raw", "D:\\PET\\data\\b00lduck.nar");
+		//imageConverter.convertNa("D:\\PET\\data\\b00lduck.raw", "D:\\PET\\data\\b00lduck.nar");
 		
-		imageConverter.convertNa("D:\\PET\\data\\font.raw", "D:\\PET\\data\\font1.nar");
+		//imageConverter.convertNa("D:\\PET\\data\\font.raw", "D:\\PET\\data\\font1.nar");
 		
 	}
 	
@@ -87,6 +87,52 @@ public class ImageConverter {
 		mapMap.put("pixel_move_lut_s3_t2_b", "pixel_move_lut_s0_t3_a");
 		mapMap.put("pixel_move_lut_s3_t2_c", new int[] { 2, 5, 4, 7, 0, 0, 0, 0 });		
 		
+		
+		mapMap.put("vertical_move_lut_0001_a", new int[] {1, 2, 3, 4, 5, 0, 7, 6});
+		mapMap.put("vertical_move_lut_0001_b", new int[] {0, 0, 0, 0, 0, 8, 0, 0});
+		
+		mapMap.put("vertical_move_lut_0010_a", new int[] {1, 2, 3, 4, 0, 6, 5, 8});
+		mapMap.put("vertical_move_lut_0010_b", new int[] {0, 0, 0, 0, 7, 0, 0, 0});
+
+		mapMap.put("vertical_move_lut_0011_a", new int[] {1, 2, 3, 4, 0, 0, 5, 6});
+		mapMap.put("vertical_move_lut_0011_b", new int[] {0, 0, 0, 0, 7, 8, 0, 0});
+
+		mapMap.put("vertical_move_lut_0100_a", new int[] {1, 0, 3, 2, 5, 6, 7, 8});
+		mapMap.put("vertical_move_lut_0100_b", new int[] {0, 4, 0, 0, 0, 0, 0, 0});
+
+		mapMap.put("vertical_move_lut_0101_a", new int[] {1, 0, 3, 2, 5, 0, 7, 6});
+		mapMap.put("vertical_move_lut_0101_b", new int[] {0, 4, 0, 0, 0, 8, 0, 0});
+
+		mapMap.put("vertical_move_lut_0110_a", new int[] {1, 0, 3, 2, 0, 6, 5, 8});
+		mapMap.put("vertical_move_lut_0110_b", new int[] {0, 4, 0, 0, 7, 0, 0, 0});
+
+		mapMap.put("vertical_move_lut_0111_a", new int[] {1, 0, 3, 2, 0, 0, 5, 6});
+		mapMap.put("vertical_move_lut_0111_b", new int[] {0, 4, 0, 0, 7, 8, 0, 0});
+
+		mapMap.put("vertical_move_lut_1000_a", new int[] {0, 2, 1, 4, 5, 6, 7, 8});
+		mapMap.put("vertical_move_lut_1000_b", new int[] {3, 0, 0, 0, 0, 0, 0, 0});
+		
+		mapMap.put("vertical_move_lut_1001_a", new int[] {0, 2, 1, 4, 5, 0, 7, 6});
+		mapMap.put("vertical_move_lut_1001_b", new int[] {3, 0, 0, 0, 0, 8, 0, 0});
+		
+		mapMap.put("vertical_move_lut_1010_a", new int[] {0, 2, 1, 4, 0, 6, 5, 8});
+		mapMap.put("vertical_move_lut_1010_b", new int[] {3, 0, 0, 0, 7, 0, 0, 0});
+
+		mapMap.put("vertical_move_lut_1011_a", new int[] {0, 2, 1, 4, 0, 0, 5, 6});
+		mapMap.put("vertical_move_lut_1011_b", new int[] {3, 0, 0, 0, 7, 8, 0, 0});
+
+		mapMap.put("vertical_move_lut_1100_a", new int[] {0, 0, 1, 2, 5, 6, 7, 8});
+		mapMap.put("vertical_move_lut_1100_b", new int[] {3, 4, 0, 0, 0, 0, 0, 0});
+
+		mapMap.put("vertical_move_lut_1101_a", new int[] {0, 0, 1, 2, 5, 0, 7, 6});
+		mapMap.put("vertical_move_lut_1101_b", new int[] {3, 4, 0, 0, 0, 8, 0, 0});
+		
+		mapMap.put("vertical_move_lut_1110_a", new int[] {0, 0, 1, 2, 0, 6, 5, 8});
+		mapMap.put("vertical_move_lut_1110_b", new int[] {3, 4, 0, 0, 7, 0, 0, 0});
+
+		mapMap.put("vertical_move_lut_1111_a", new int[] {0, 0, 1, 2, 0, 0, 5, 6});
+		mapMap.put("vertical_move_lut_1111_b", new int[] {3, 4, 0, 0, 7, 8, 0, 0});
+		
 	}
 	
 	
@@ -99,7 +145,8 @@ public class ImageConverter {
 	
 	public String bittable() {
 		
-		String ret = "// THIS FILE IS GENERATED - DO NOT CHANGE!\n.pc = DBMF_TABLES \"Lookup tables (aligned)\"\n"; 
+		String ret = "// THIS FILE IS GENERATED - DO NOT CHANGE!\n";
+		ret += "!: .pc = !- \"Bitmap font lookup tables (aligned)\"\n"; 
 		ret += ".align $0100\n";		
 		ret += "// Conversion table for bitmap font output\n";
 		

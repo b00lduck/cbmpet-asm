@@ -22,13 +22,14 @@ image2: :ConvertPicture("../data/b00lduck.png")
 !: .pc = !- "Image: verfassungsschutz logo"			
 image3: :ConvertPicture("../data/demo1.png")
 
-!: .pc = !- "Image: NRW logo"			
-image4: :ConvertPicture("../data/Demo2.png")
+!: .pc = !- "Image: Scroller background"			
+image4: :ConvertPicture("../data/scroller_bg.png")
 
 
 !: .pc = !- "Font: 5x6"			
 font1: :ConvertPicture("../data/font.png")
 
+!: .pc = !- "End of data"	
 		
 .macro ConvertPicture(FILENAME) {
 	

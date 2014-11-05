@@ -10,6 +10,8 @@
 .const VVRAM_SIZE = 		$0160
 .const VVRAM_END =  		VVRAM + VVRAM_SIZE
 
+.const VVRAM_TEMP = 		$7000
+
 // VVRAM IS 88x32 pixel (80x32 + padding left and right 4px)
 // which is 22x16 bytes = #352 ($0160)
 

@@ -64,6 +64,7 @@
 		sta $E849	
 
 		:DrawScroller()
+		:CopyScroller()
 		
 		jmp maindraw
 		
@@ -207,8 +208,11 @@
 				
 	wigga:
 		inc framecount			
-
-		:AdvanceScroller()				
+		
+	
+		:AdvanceScroller()		
+	
+	!:
 				
 		jmp (orig_isr)		// jump to original interrupt	
 		
