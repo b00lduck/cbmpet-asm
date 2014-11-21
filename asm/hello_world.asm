@@ -34,7 +34,7 @@
 		:ClearVVRAM()
 		//:Checkerboard2()
 		//:LoadImage()
-		:LoadImageNA(bus)
+		//:LoadImageNA(bus)
 		:SwitchLowercase()
 		
 		:DrawTextZt(2, 18, hello2)
@@ -63,8 +63,8 @@
 		sta $E848	
 		sta $E849	
 
-		//:DrawScroller()
-		//:CopyScroller()
+		:DrawScroller()
+		:CopyScroller()
 		
 		jmp maindraw
 		
